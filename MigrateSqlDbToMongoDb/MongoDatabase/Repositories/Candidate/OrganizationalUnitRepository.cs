@@ -21,8 +21,15 @@ namespace Candidate.Persistance.Repositories
 
 		public async Task<OrganizationalUnit> GetOrganizationalUnitByIdAsync(string organizationalUnitId)
 		{
-			return await _dbContext.OrganizationalUnitCollection.AsQueryable()
-				.FirstOrDefaultAsync(f => f.Id == organizationalUnitId);
+            try
+            {
+                return await _dbContext.OrganizationalUnitCollection.AsQueryable()
+                .FirstOrDefaultAsync(f => f.Id == organizationalUnitId);
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }			
 		}
 
 		public async Task CreateOrganizationalUnitAsync(OrganizationalUnit organizationalUnit)
