@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using MigrateSqlDbToMongoDbApplication.Services;
-using SqlDatabase.Model;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace MigrateSqlDbToMongoDbApplication
@@ -22,12 +20,11 @@ namespace MigrateSqlDbToMongoDbApplication
         {
             Configuration();
 
-            var sqlConnectionString = configuration.GetSection("SQLDB:ConnectionString").Value;
-            var transfer = new MigrateCandidate();
+            var transfer = new MigrateJob();
             Task.Run(async () =>
             {
-                var candidate = await transfer.Execute(configuration);
-                Console.WriteLine("Insert successed {0} ", candidate);
+                var jobs = await transfer.Execute(configuration);
+                Console.WriteLine("Insert successed {0} {1}", jobs, nameof(jobs));
             });           
             Console.WriteLine("Press any key to exit...");
                 Console.ReadLine();

@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MongoDatabaseHrToolv1\MongoDatabaseHrToolv1.csproj" />
     <ProjectReference Include="..\MongoDatabase\MongoDatabase.csproj" />
-    <ProjectReference Include="..\SqlDatabase\SqlDatabase.csproj" />
   </ItemGroup>
 
   <ItemGroup>
