@@ -6,6 +6,10 @@ namespace SqlDatabase.Repository
 {
     public class CandidateRepository
     {
+        public CandidateRepository()
+        {
+
+        }
         public List<Candidate> GetCandidates()
         {
             using (var db = new HrToolDbContext())

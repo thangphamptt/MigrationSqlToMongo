@@ -1,35 +1,36 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using MigrateSqlDbToMongoDbApplication.Services;
 using SqlDatabase.Model;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MigrateSqlDbToMongoDbApplication
 {
     class Program
     {
-        private static IConfigurationRoot configuration;
+        private static IConfiguration configuration;
 
         private static void Configuration()
         {
             var builder = new ConfigurationBuilder()
                  .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-            configuration = builder.Build();              
-        }       
+            configuration = builder.Build();
+        }
 
         static void Main(string[] args)
         {
             Configuration();
 
             var sqlConnectionString = configuration.GetSection("SQLDB:ConnectionString").Value;
-            using (var dbContext = HrToolDbContextFactory.CreateDbContext(sqlConnectionString))
+            var transfer = new MigrateCandidate();
+            Task.Run(async () =>
             {
-                var data = dbContext.Template.ToList();
-                Console.WriteLine("Candidate count: {0}", data.Count);
-                Console.WriteLine("Press any key to exit...");
-                Console.ReadKey();
-            }
+                var candidate = await transfer.Execute(configuration);
+                Console.WriteLine("Insert successed {0} ", candidate);
+            });           
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
         }
     }
 }
