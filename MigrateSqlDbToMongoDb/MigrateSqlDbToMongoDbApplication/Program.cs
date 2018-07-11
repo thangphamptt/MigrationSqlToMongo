@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MigrateSqlDbToMongoDbApplication
 {
-    class Program
+	class Program
     {
         private static IConfiguration configuration;
 
@@ -30,7 +30,7 @@ namespace MigrateSqlDbToMongoDbApplication
                 Console.WriteLine("Insert successed {0} ", candidate);
             });           
             Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
+                Console.ReadLine();
         }
     }
 }
