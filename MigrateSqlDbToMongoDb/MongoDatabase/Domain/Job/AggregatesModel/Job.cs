@@ -5,17 +5,8 @@ using System.Linq;
 
 namespace MongoDatabase.Domain.Job.AggregatesModel
 {
-	public class Job : IAggregateRoot, IEntity
-    {
-        public Job()
-        {
-            CategoryIds = new List<string>();
-            FollowedByUserIds = new List<string>();
-            OwnedByUserIds = new List<string>();
-            ReadByUserIds = new List<string>();
-            Publications = new List<Publication>();
-        }
-
+    public class Job : IAggregateRoot, IEntity
+    {    
         public string Id { get; set; }
         public string Name { get; set; }
         public int? Vacancies { get; set; }
@@ -30,17 +21,10 @@ namespace MongoDatabase.Domain.Job.AggregatesModel
         public DateTime CreatedDate { get; set; }
         public string ModifiedByUserId { get; set; }
         public DateTime? ModifiedDate { get; set; }
-        public IList<string> CategoryIds { get; set; }
-        public IList<string> FollowedByUserIds { get; set; }
-        public IList<string> OwnedByUserIds { get; set; }
-        public IList<string> ReadByUserIds { get; set; }
+        public IList<string> CategoryIds { get; set; } = new List<string>();
+        public IList<string> FollowedByUserIds { get; set; } = new List<string>();
+        public IList<string> OwnedByUserIds { get; set; } = new List<string>();
+        public IList<string> ReadByUserIds { get; set; } = new List<string>();
         public IList<Publication> Publications { get; set; } = new List<Publication>();
-
-        public void ExpirationDateMustBeGreaterThanPublishedDate()
-        {
-            if (Publications.FirstOrDefault()?.ExpirationDate < Publications.FirstOrDefault()?.PublishedDate)
-            {
-            }
-        }
     }
 }
