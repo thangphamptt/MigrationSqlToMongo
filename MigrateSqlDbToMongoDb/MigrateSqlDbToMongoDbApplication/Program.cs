@@ -46,6 +46,7 @@ namespace MigrateSqlDbToMongoDbApplication
             {
                 Console.WriteLine("Can not add OrganizationalUnit");
             }
+            Console.ReadKey();
         }
     }
 }
