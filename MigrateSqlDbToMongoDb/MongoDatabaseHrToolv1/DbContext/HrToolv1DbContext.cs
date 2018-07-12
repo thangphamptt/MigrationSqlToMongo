@@ -21,5 +21,9 @@ namespace MongoDatabaseHrToolv1.DbContext
         private IMongoCollection<RecruitmentTemplate> RecruitmentTemplateCollection => _database.GetCollection<RecruitmentTemplate>(nameof(RecruitmentTemplate));
         public IQueryable<RecruitmentTemplate> RecruitmentTemplates => RecruitmentTemplateCollection.AsQueryable();
 
-    }
+
+		private IMongoCollection<JobStatus> JobStatusCollection => _database.GetCollection<JobStatus>(nameof(JobStatus));
+		public IQueryable<JobStatus> JobStatuses => JobStatusCollection.AsQueryable();
+
+	}
 }

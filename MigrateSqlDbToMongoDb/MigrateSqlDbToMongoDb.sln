@@ -10,6 +10,7 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MongoDatabase", "MongoDatabase\MongoDatabase.csproj", "{2C16BC12-FAD8-41CF-9830-5F9BA9E26EC3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MongoDatabaseHrToolv1", "MongoDatabaseHrToolv1\MongoDatabaseHrToolv1.csproj", "{468858C3-8D9E-46E6-BF7E-0584A74B50C2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infranstructure", "Infranstructure\Infranstructure.csproj", "{5A01EA04-BEBF-4BA9-9FD9-4F831C1CBC60}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +34,10 @@ Global
 		{468858C3-8D9E-46E6-BF7E-0584A74B50C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{468858C3-8D9E-46E6-BF7E-0584A74B50C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{468858C3-8D9E-46E6-BF7E-0584A74B50C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A01EA04-BEBF-4BA9-9FD9-4F831C1CBC60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A01EA04-BEBF-4BA9-9FD9-4F831C1CBC60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A01EA04-BEBF-4BA9-9FD9-4F831C1CBC60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A01EA04-BEBF-4BA9-9FD9-4F831C1CBC60}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
