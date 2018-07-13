@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using MigrateSqlDbToMongoDbApplication.Services;
+using MongoDatabaseHrToolv1.DbContext;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace MigrateSqlDbToMongoDbApplication
@@ -18,14 +20,41 @@ namespace MigrateSqlDbToMongoDbApplication
 
         static void Main(string[] args)
         {
-            Configuration();            
-
+            Configuration();
             Task.Run(async () =>
             {
                 await MigrateJob();
                 await MigrateOrganizationalUnit();
-            });           
+            });
+            MigrateCandidate();
             Console.ReadKey();
+
+        }
+        static void MigrateCandidate()
+        {
+            HrToolv1DbContext hrToolDbContext = new HrToolv1DbContext(configuration);
+            var candidates = hrToolDbContext.Candidates.ToList();
+            var migrateCandidate = new MigrateCandidateToCandidateService();
+
+            Console.WriteLine("Start migrate candidate to Services.....");
+
+            var insertCandidateToCandidateService = migrateCandidate.InsertCandidateToCandidateService(configuration, candidates).Result;
+            Console.WriteLine("{0} candidate(s) inserted to CandidateService", insertCandidateToCandidateService);
+
+            var insertCandidateToInterviewService = migrateCandidate.InsertCandidateToInterviewService(configuration, candidates).Result;
+            Console.WriteLine("{0} candidate(s) inserted to InterviewService", insertCandidateToInterviewService);
+
+            var insertCandidateToJobService = migrateCandidate.InsertCandidateToJobService(configuration, candidates).Result;
+            Console.WriteLine("{0} candidate(s) inserted to JobService", insertCandidateToJobService);
+
+            var insertCandidateToJobMatchingService = migrateCandidate.InsertCandidateToJobMatchingService(configuration, candidates).Result;
+            Console.WriteLine("{0} candidate(s) inserted to JobMatchingService", insertCandidateToJobMatchingService);
+
+            var insertCandidateToOfferService = migrateCandidate.InsertCandidateToOfferService(configuration, candidates).Result;
+            Console.WriteLine("{0} candidate(s) inserted to OfferService", insertCandidateToOfferService);
+
+            var insertCandidateToScheduleService = migrateCandidate.InsertCandidateToScheduleService(configuration, candidates).Result;
+            Console.WriteLine("{0} candidate(s) inserted to ScheduleService", insertCandidateToScheduleService);
         }
 
         static async Task MigrateJob()
