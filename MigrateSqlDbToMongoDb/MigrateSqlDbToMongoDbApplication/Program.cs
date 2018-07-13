@@ -26,7 +26,8 @@ namespace MigrateSqlDbToMongoDbApplication
             {
                 //await MigrateJob();
                 //await MigrateOrganizationalUnit();
-                await MigrateOffer();
+                //await MigrateOffer();
+                await MigrateTemplate();
             });
            // MigrateCandidate();
             Console.ReadKey();
@@ -108,6 +109,14 @@ namespace MigrateSqlDbToMongoDbApplication
             var migrateOfferToOfferService = new MigrateOfferToOfferService();
             var offers = await migrateOfferToOfferService.Execute(configuration);
             Console.WriteLine("Migrate [offer] to [Offer Service] Succeed {0} records \n", offers);
+        }
+
+        static async Task MigrateTemplate()
+        {
+            Console.WriteLine("Start migrate [template] to [Template Service].....");
+            var migrateTemplateToTemplateService = new MigrateTemplateToTemplateService();
+            var templates = await migrateTemplateToTemplateService.Execute(configuration);
+            Console.WriteLine("Migrate [template] to [Template Service] Succeed {0} records \n", templates);
         }
     }
 }
