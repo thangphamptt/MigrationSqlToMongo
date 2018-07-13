@@ -26,6 +26,8 @@ namespace MongoDatabaseHrToolv1.DbContext
 
 		private IMongoCollection<JobApplication> JobApplicationCollection => _database.GetCollection<JobApplication>(nameof(JobApplication));
 		public IQueryable<JobApplication> JobApplications => JobApplicationCollection.AsQueryable();
+        private IMongoCollection<Position> PositionCollection => _database.GetCollection<Position>(nameof(Position));
+        public IQueryable<Position> Positions => PositionCollection.AsQueryable();
 
 		private IMongoCollection<Candidate> CandidateCollection => _database.GetCollection<Candidate>(nameof(Candidate));
 		public IQueryable<Candidate> Candidates => CandidateCollection.AsQueryable();
@@ -36,12 +38,12 @@ namespace MongoDatabaseHrToolv1.DbContext
 
 		private IMongoCollection<EmploymentHistory> EmploymentHistoryCollection => _database.GetCollection<EmploymentHistory>(nameof(EmploymentHistory));
 		public IQueryable<EmploymentHistory> EmploymentHistories => EmploymentHistoryCollection.AsQueryable();
-
+       
 		private IMongoCollection<OutstandingProject> OutstandingProjectCollection => _database.GetCollection<OutstandingProject>(nameof(OutstandingProject));
 		public IQueryable<OutstandingProject> OutstandingProjects => OutstandingProjectCollection.AsQueryable();
 
 		private IMongoCollection<Skill> SkillCollection => _database.GetCollection<Skill>(nameof(Skill));
 		public IQueryable<Skill> Skills => SkillCollection.AsQueryable();
 		#endregion
-	}
+    }
 }
