@@ -5,6 +5,9 @@ using JobDomainModel = MongoDatabase.Domain.Job.AggregatesModel;
 using CandidateDomainModel = MongoDatabase.Domain.Candidate.AggregatesModel;
 using InterviewDomainModel = MongoDatabase.Domain.Interview.AggregatesModel;
 using OfferDomainModel = MongoDatabase.Domain.Offer.AggregatesModel;
+using System.Text;
+using System.Security.Cryptography;
+using System;
 
 namespace MigrateSqlDbToMongoDbApplication.Services
 {
@@ -76,6 +79,27 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                 }
             }
             return OfferDomainModel.JobStatus.Closed;
+        }
+
+        public static string Decrypt(string toDecrypt, bool useHashing)
+        {
+            const string KeyEncrypt = "HRTool";
+            if (string.IsNullOrEmpty(toDecrypt)) return toDecrypt;
+            byte[] keyArray;
+            var toEncryptArray = Convert.FromBase64String(toDecrypt);
+            if (useHashing)
+            {
+                var hashmd5 = new MD5CryptoServiceProvider();
+                keyArray = hashmd5.ComputeHash(Encoding.UTF8.GetBytes(KeyEncrypt));
+            }
+            else
+            {
+                keyArray = Encoding.UTF8.GetBytes(KeyEncrypt);
+            }
+            var tdes = new TripleDESCryptoServiceProvider { Key = keyArray, Mode = CipherMode.ECB, Padding = PaddingMode.PKCS7 };
+            var cTransform = tdes.CreateDecryptor();
+            var resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
+            return Encoding.UTF8.GetString(resultArray);
         }
     }
 }

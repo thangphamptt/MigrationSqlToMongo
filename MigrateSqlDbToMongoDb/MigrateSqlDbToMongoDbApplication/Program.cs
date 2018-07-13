@@ -20,13 +20,15 @@ namespace MigrateSqlDbToMongoDbApplication
 
         static void Main(string[] args)
         {
-            Configuration();
+            Configuration();         
+
             Task.Run(async () =>
             {
-                await MigrateJob();
-                await MigrateOrganizationalUnit();
+                //await MigrateJob();
+                //await MigrateOrganizationalUnit();
+                await MigrateOffer();
             });
-            MigrateCandidate();
+           // MigrateCandidate();
             Console.ReadKey();
 
         }
@@ -98,6 +100,14 @@ namespace MigrateSqlDbToMongoDbApplication
             {
                 Console.WriteLine("OrganizationalUnit existed.\n");
             }
+        }
+
+        static async Task MigrateOffer()
+        {
+            Console.WriteLine("Start migrate [offer] to [Offer Service].....");
+            var migrateOfferToOfferService = new MigrateOfferToOfferService();
+            var offers = await migrateOfferToOfferService.Execute(configuration);
+            Console.WriteLine("Migrate [offer] to [Offer Service] Succeed {0} records \n", offers);
         }
     }
 }
