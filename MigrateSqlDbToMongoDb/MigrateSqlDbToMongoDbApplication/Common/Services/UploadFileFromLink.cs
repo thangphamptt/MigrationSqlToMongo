@@ -2,15 +2,13 @@
 using Infrastructure.AzureStorage.UploadFileToAzureStorage;
 using MigrateSqlDbToMongoDbApplication.Common.Services.Model;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MigrateSqlDbToMongoDbApplication.Common.Services
 {
-    public class UploadFileFromLink
+	public class UploadFileFromLink
     {
 		private readonly string _connectionString;
 		public UploadFileFromLink(string connectionString)
@@ -19,7 +17,7 @@ namespace MigrateSqlDbToMongoDbApplication.Common.Services
 		}
 
 		private UploadFileToAzureStorage _uploadFileToAzureStorage = new UploadFileToAzureStorage();
-		public async Task<string> GetProfilePathAsync(AttachmentFileModel attachment, string newPath, string containerFolder)
+		public async Task<string> GetAttachmentPathAsync(AttachmentFileModel attachment, string newPath, string containerFolder)
 		{
 			using (var client = new HttpClient())
 			{
