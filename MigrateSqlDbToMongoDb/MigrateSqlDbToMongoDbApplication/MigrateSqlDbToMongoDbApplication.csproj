@@ -9,9 +9,11 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.1" />
+    <PackageReference Include="MimeMapping" Version="1.0.1.12" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Infranstructure\Infranstructure.csproj" />
     <ProjectReference Include="..\MongoDatabase\MongoDatabase.csproj" />
     <ProjectReference Include="..\MongoDatabaseHrToolv1\MongoDatabaseHrToolv1.csproj" />
   

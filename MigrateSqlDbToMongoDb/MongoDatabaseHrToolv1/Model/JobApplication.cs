@@ -25,9 +25,9 @@ namespace MongoDatabaseHrToolv1.Model
 		public object SalaryOffer { get; set; }
 		public string Note { get; set; }
 		public int CompanyId { get; set; }
-		public object CvsourceId { get; set; }
+		public object CVSourceId { get; set; }
 		public object IsCandidateUpdated { get; set; }
-		public object GroupIq { get; set; }
+		public object GroupIQ { get; set; }
 		public object GroupTechnical { get; set; }
 		public object NumberRoundInterview { get; set; }
 		public object StartDateSuggest { get; set; }
