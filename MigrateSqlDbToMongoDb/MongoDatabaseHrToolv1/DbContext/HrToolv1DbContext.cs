@@ -44,6 +44,9 @@ namespace MongoDatabaseHrToolv1.DbContext
 
 		private IMongoCollection<Skill> SkillCollection => _database.GetCollection<Skill>(nameof(Skill));
 		public IQueryable<Skill> Skills => SkillCollection.AsQueryable();
+
+		private IMongoCollection<JobApplicationAttachment> JobApplicationAttachmentCollection => _database.GetCollection<JobApplicationAttachment>(nameof(JobApplicationAttachment));
+		public IQueryable<JobApplicationAttachment> JobApplicationAttachments => JobApplicationAttachmentCollection.AsQueryable();
 		#endregion
     }
 }

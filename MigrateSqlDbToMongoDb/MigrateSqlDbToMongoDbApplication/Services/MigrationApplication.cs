@@ -7,6 +7,7 @@ using MongoDatabase.Domain.Candidate.AggregatesModel;
 using System.Linq;
 using MigrateSqlDbToMongoDbApplication.Constants;
 using System;
+using MigrateSqlDbToMongoDbApplication.Common.Services;
 
 namespace MigrateSqlDbToMongoDbApplication.Services
 {
@@ -15,23 +16,30 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 		private HrToolv1DbContext hrToolDbContext;
 		private CandidateDbContext candidateDbContext;
 		private InterviewDbContext interviewDbContext;
+		private readonly string cvAttachmentFolderName;
+		private readonly string oldHrtoolStoragePath;
 		private string organizationalUnitId;
 		private readonly string userId;
+		private readonly UploadFileFromLink uploadFileFromLink;
 
 		public MigrationApplication(IConfiguration configuration)
 		{
 			hrToolDbContext = new HrToolv1DbContext(configuration);
 			candidateDbContext = new CandidateDbContext(configuration);
 			interviewDbContext = new InterviewDbContext(configuration);
+			uploadFileFromLink = new UploadFileFromLink(configuration.GetSection("AzureStorage:StorageConnectionString")?.Value);
+			cvAttachmentFolderName = configuration.GetSection("AzureStorage:CvAttachmentContainerName")?.Value;
+			oldHrtoolStoragePath = configuration.GetSection("OldHrtoolStoragePath")?.Value;
 			organizationalUnitId = configuration.GetSection("CompanySetting:Id")?.Value;
 			userId = configuration.GetSection("AdminUser:Id")?.Value;
 		}
 
-		public void Execute()
+		public async Task ExecuteAsync()
 		{
 			var pipeline = candidateDbContext.Pipelines.FirstOrDefault(x => x.OrganizationalUnitId == organizationalUnitId);
-			var results = new List<MongoDatabase.Domain.Candidate.AggregatesModel.Application>();
-			var applications = hrToolDbContext.JobApplications.ToList();
+			var results = new List<Application>();
+			var m = new List<int> { 3776, 3771 , 3785 };
+			var applications = hrToolDbContext.JobApplications.Where(x=>m.Contains(x.ExternalId)).ToList();
 
 			foreach (var app in applications)
 			{
@@ -39,10 +47,12 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 				var jo = (app.JobId is int) ? GetJob(hrToolDbContext, (int)app.JobId) : null;
 				var isReject = app.OverallStatus != null ? IsReject((int)app.OverallStatus) : false;
 				var currentPipelineStage = GetPipeline(pipeline, (int)app.OverallStatus);
-				var a = new MongoDatabase.Domain.Candidate.AggregatesModel.Application
+
+				var a = new Application
 				{
 					AppliedDate = app.CreatedDate,
 					CandidateId = ca.Id.ToString(),
+					IsSentEmail = app.IsSendMail is bool ? (bool)app.IsSendMail : false,
 					Id = app.Id.ToString(),
 					OrganizationalUnitId = organizationalUnitId,
 					JobId = jo?.Id.ToString() ?? null,
@@ -59,16 +69,24 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 						Projects = GetProjects(hrToolDbContext, ca.ExternalId),
 						Skills = GetSkills(hrToolDbContext, ca.ExternalId),
 						WorkExperiences = GetWorkExperiences(hrToolDbContext, ca.ExternalId)
-					}
+					},
+					//Attachments = await GetAttachments(new AttachmentInfo
+					//{
+					//	ContainerFolder = cvAttachmentFolderName,
+					//	NewApplicationId = app.Id,
+					//	NewCandidateId = ca.Id,
+					//	OldApplicationId = app.ExternalId,
+					//	OldStoragePath= oldHrtoolStoragePath
+					//})
 				};
 				results.Add(a);
 				if (!candidateDbContext.Applications.Any(x => x.Id == a.Id))
 				{
-					candidateDbContext.ApplicationCollection.InsertOne(a);
+					await candidateDbContext.ApplicationCollection.InsertOneAsync(a);
 				}
 				if (!interviewDbContext.Applications.Any(x => x.Id == a.Id))
 				{
-					interviewDbContext.ApplicationCollection.InsertOneAsync(new MongoDatabase.Domain.Interview.AggregatesModel.Application
+					await interviewDbContext.ApplicationCollection.InsertOneAsync(new MongoDatabase.Domain.Interview.AggregatesModel.Application
 					{
 						Id = app.Id.ToString()
 					});
@@ -267,6 +285,40 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 		private MongoDatabaseHrToolv1.Model.Job GetJob(HrToolv1DbContext hrToolDbContext, int externalId)
 		{
 			return hrToolDbContext.Jobs.FirstOrDefault(x => x.ExternalId == externalId);
+		}
+
+		private async Task<IList<File>> GetAttachments(AttachmentInfo info)
+		{
+			var results = new List<File>();
+			var attachments = hrToolDbContext.JobApplicationAttachments.Where(x => x.JobApplicationId == info.OldApplicationId).Select(x => x);
+			foreach (var attachment in attachments)
+			{
+				var contentType = MimeMapping.MimeUtility.GetMimeMapping(attachment.Filename);
+				var newLink = $"{organizationalUnitId}/{info.NewCandidateId.ToString()}/{info.NewApplicationId.ToString()}/{attachment.Filename}";
+				var path = await uploadFileFromLink.GetAttachmentPathAsync(
+					new Common.Services.Model.AttachmentFileModel
+					{
+						Name = attachment.Filename,
+						Path = info.OldStoragePath + attachment.Path
+					}, newLink, info.ContainerFolder);
+				var newAttachment = new File
+				{
+					Id = attachment.Id.ToString(),
+					Name = attachment.Filename,
+					Path = path
+				};
+				results.Add(newAttachment);
+			}
+			return results;
+		}
+
+		private class AttachmentInfo
+		{
+			public int OldApplicationId { get; set; }
+			public MongoDB.Bson.ObjectId NewCandidateId { get; set; }
+			public MongoDB.Bson.ObjectId NewApplicationId { get; set; }
+			public string ContainerFolder { get; set; }
+			public string OldStoragePath { get; set; }
 		}
 	}
 }

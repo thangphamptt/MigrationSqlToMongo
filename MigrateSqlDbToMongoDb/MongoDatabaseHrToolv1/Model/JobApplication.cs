@@ -6,10 +6,6 @@ namespace MongoDatabaseHrToolv1.Model
 {
 	public partial class JobApplication
 	{
-		public JobApplication()
-		{
-		}
-
 		[BsonElement("_id")]
 		public ObjectId Id { get; set; }
 		[BsonElement("Id")]
