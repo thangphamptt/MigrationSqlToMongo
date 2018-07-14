@@ -8,6 +8,7 @@ using System.Linq;
 using MigrateSqlDbToMongoDbApplication.Constants;
 using System;
 using MigrateSqlDbToMongoDbApplication.Common.Services;
+using MongoDB.Driver;
 
 namespace MigrateSqlDbToMongoDbApplication.Services
 {
@@ -34,25 +35,37 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 			userId = configuration.GetSection("AdminUser:Id")?.Value;
 		}
 
-		public async Task ExecuteAsync()
+		public async Task<int> ExecuteAsync()
 		{
 			var pipeline = candidateDbContext.Pipelines.FirstOrDefault(x => x.OrganizationalUnitId == organizationalUnitId);
 			var results = new List<Application>();
-			var m = new List<int> { 3776, 3771 , 3785 };
-			var applications = hrToolDbContext.JobApplications.Where(x=>m.Contains(x.ExternalId)).ToList();
-
+			var applications = hrToolDbContext.JobApplications.ToList();
+			var totalApplications = 0;
 			foreach (var app in applications)
 			{
 				var ca = GetCandidate(hrToolDbContext, app.CandidateId);
-				var jo = (app.JobId is int) ? GetJob(hrToolDbContext, (int)app.JobId) : null;
-				var isReject = app.OverallStatus != null ? IsReject((int)app.OverallStatus) : false;
-				var currentPipelineStage = GetPipeline(pipeline, (int)app.OverallStatus);
+				var jo = (app.JobId is int) ?
+					GetJob(hrToolDbContext, (int)app.JobId) : null;
+				var isReject = (app.OverallStatus is int) ?
+					IsReject((int)app.OverallStatus) : false;
 
+				var currentPipelineStage = (app.OverallStatus is int) ?
+					GetPipeline(pipeline, (int)app.OverallStatus) : pipeline.Stages.FirstOrDefault(x => x.StageType == StageType.Sourced);
+
+				var attachments = await GetAttachments(new AttachmentInfo
+				{
+					ContainerFolder = cvAttachmentFolderName,
+					NewApplicationId = app.Id,
+					NewCandidateId = ca.Id,
+					OldApplicationId = app.ExternalId,
+					OldStoragePath = oldHrtoolStoragePath
+				});
 				var a = new Application
 				{
 					AppliedDate = app.CreatedDate,
 					CandidateId = ca.Id.ToString(),
-					IsSentEmail = app.IsSendMail is bool ? (bool)app.IsSendMail : false,
+					IsSentEmail = app.IsSendMail is bool ?
+						(bool)app.IsSendMail : false,
 					Id = app.Id.ToString(),
 					OrganizationalUnitId = organizationalUnitId,
 					JobId = jo?.Id.ToString() ?? null,
@@ -70,19 +83,16 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 						Skills = GetSkills(hrToolDbContext, ca.ExternalId),
 						WorkExperiences = GetWorkExperiences(hrToolDbContext, ca.ExternalId)
 					},
-					//Attachments = await GetAttachments(new AttachmentInfo
-					//{
-					//	ContainerFolder = cvAttachmentFolderName,
-					//	NewApplicationId = app.Id,
-					//	NewCandidateId = ca.Id,
-					//	OldApplicationId = app.ExternalId,
-					//	OldStoragePath= oldHrtoolStoragePath
-					//})
+					Attachments = attachments
 				};
 				results.Add(a);
 				if (!candidateDbContext.Applications.Any(x => x.Id == a.Id))
 				{
 					await candidateDbContext.ApplicationCollection.InsertOneAsync(a);
+				}
+				else
+				{
+					await candidateDbContext.ApplicationCollection.ReplaceOneAsync((x => x.Id == a.Id), a);
 				}
 				if (!interviewDbContext.Applications.Any(x => x.Id == a.Id))
 				{
@@ -91,7 +101,9 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 						Id = app.Id.ToString()
 					});
 				}
+				totalApplications++;
 			}
+			return totalApplications;
 		}
 
 		private PipelineStage GetPipeline(Pipeline pipeline, int? status)
@@ -136,11 +148,10 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 						return pipeline.Stages.FirstOrDefault(x => x.StageType == StageType.Offered);
 
 					case (int)EnumResult.Shortlist:
-						return pipeline.Stages.FirstOrDefault(x => x.StageType == StageType.Shortlisted);
+						return pipeline.Stages.FirstOrDefault(x => x.StageType == StageType.Interviewing);
 
 					case (int)EnumBecomeEmployee.Completed:
 						return pipeline.Stages.FirstOrDefault(x => x.StageType == StageType.Hired);
-
 				}
 			}
 			return pipeline.Stages.FirstOrDefault(x => x.StageType == StageType.New);

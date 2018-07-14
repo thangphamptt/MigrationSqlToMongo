@@ -9,14 +9,16 @@ using System.Threading.Tasks;
 namespace MigrateSqlDbToMongoDbApplication.Common.Services
 {
 	public class UploadFileFromLink
-    {
+	{
 		private readonly string _connectionString;
 		public UploadFileFromLink(string connectionString)
 		{
 			_connectionString = connectionString;
+			_uploadFileToAzureStorage = new UploadFileToAzureStorage();
 		}
 
-		private UploadFileToAzureStorage _uploadFileToAzureStorage = new UploadFileToAzureStorage();
+		private UploadFileToAzureStorage _uploadFileToAzureStorage;
+
 		public async Task<string> GetAttachmentPathAsync(AttachmentFileModel attachment, string newPath, string containerFolder)
 		{
 			using (var client = new HttpClient())
