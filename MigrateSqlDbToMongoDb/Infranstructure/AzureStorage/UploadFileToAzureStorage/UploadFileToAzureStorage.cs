@@ -7,6 +7,10 @@ namespace Infrastructure.AzureStorage.UploadFileToAzureStorage
 {
 	public class UploadFileToAzureStorage
 	{
+		public UploadFileToAzureStorage()
+		{
+		}
+
 		public async Task<string> UploadFileAsync(FileAzureStorageModel fileAzureStorageModel)
 		{
 			CloudStorageAccount _storageAccount = CloudStorageAccount.Parse(fileAzureStorageModel.StorageConnectionString);
@@ -20,7 +24,7 @@ namespace Infrastructure.AzureStorage.UploadFileToAzureStorage
 
 			using (var stream = fileAzureStorageModel.Stream)
 			{
-			   await blockBlob.UploadFromStreamAsync(fileAzureStorageModel.Stream);
+				await blockBlob.UploadFromStreamAsync(fileAzureStorageModel.Stream);
 			}
 
 			return blockBlob.Name;

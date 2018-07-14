@@ -29,7 +29,8 @@ namespace MigrateSqlDbToMongoDbApplication
                 await MigrateOffer();
             });
            // MigrateCandidate();
-            Console.ReadKey();
+			MigrationApplication();
+			Console.ReadKey();
 
         }
         static void MigrateCandidate()
@@ -58,6 +59,13 @@ namespace MigrateSqlDbToMongoDbApplication
             var insertCandidateToScheduleService = migrateCandidate.InsertCandidateToScheduleService(configuration, candidates).Result;
             Console.WriteLine("{0} candidate(s) inserted to ScheduleService", insertCandidateToScheduleService);
         }
+
+		static void MigrationApplication()
+		{
+			var applicationService = new MigrationApplication(configuration);
+			var totalApplications = applicationService.ExecuteAsync().Result;
+			Console.WriteLine($"{totalApplications} application(s) inserted to CandidateService");
+		}
 
         static async Task MigrateJob()
         {
