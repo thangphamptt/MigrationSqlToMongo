@@ -4,6 +4,7 @@ using MongoDatabase.DbContext;
 using MongoDatabaseHrToolv1.DbContext;
 using System.Linq;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using System.Collections.Generic;
 using System;
 using MongoDatabase.Domain.Candidate.AggregatesModel;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace MigrateSqlDbToMongoDbApplication.Services
 {
-    public class MigrationEmailService
+    public class MigrationEmailToEmailService
 	{
 		private readonly HrToolv1DbContext hrToolDbContext;
 		private readonly EmailDbContext emailDbContext;
@@ -22,7 +23,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 		private readonly string userId;
 		private readonly UploadFileFromLink uploadFileFromLink;
 
-		public MigrationEmailService(IConfiguration configuration)
+		public MigrationEmailToEmailService(IConfiguration configuration)
 		{
 			hrToolDbContext = new HrToolv1DbContext(configuration);
 			candidateDbContext = new CandidateDbContext(configuration);
@@ -37,7 +38,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 		public async Task<int> ExecuteAsync()
 		{
 			var totalEmails = 0;
-			var interiewEmails = hrToolDbContext.EmailTrackings.Where(x => x.TypeOfEmail == "Scheduling Email").ToList();
+			var interiewEmails = await hrToolDbContext.EmailTrackingCollection.AsQueryable().Where(x => x.TypeOfEmail == "Scheduling Email").ToListAsync();
 			foreach(var email in interiewEmails)
 			{
 				if (!emailDbContext.Emails.Any(x => x.Id == email.Id.ToString()))
@@ -46,7 +47,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 					totalEmails++;
 				}
 			}
-			var offerEmails = hrToolDbContext.EmailTrackings.Where(x => x.TypeOfEmail == "Offer Email").ToList();
+			var offerEmails = await hrToolDbContext.EmailTrackingCollection.AsQueryable().Where(x => x.TypeOfEmail == "Offer Email").ToListAsync();
 			foreach (var email in offerEmails)
 			{
 				if (!emailDbContext.Emails.Any(x => x.Id == email.Id.ToString()))
@@ -56,7 +57,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 				}
 			}
 
-			var thankyouEmails = hrToolDbContext.EmailTrackings.Where(x => x.TypeOfEmail == "Thank You Email").ToList();
+			var thankyouEmails = await hrToolDbContext.EmailTrackingCollection.AsQueryable().Where(x => x.TypeOfEmail == "Thank You Email").ToListAsync();
 			foreach (var email in thankyouEmails)
 			{
 				if (!emailDbContext.Emails.Any(x => x.Id == email.Id.ToString()))

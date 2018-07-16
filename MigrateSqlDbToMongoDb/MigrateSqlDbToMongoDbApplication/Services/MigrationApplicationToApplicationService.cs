@@ -12,22 +12,20 @@ using MongoDB.Driver;
 
 namespace MigrateSqlDbToMongoDbApplication.Services
 {
-	public class MigrationApplication
+	public class MigrationApplicationToApplicationService
 	{
 		private HrToolv1DbContext hrToolDbContext;
 		private CandidateDbContext candidateDbContext;
-		private InterviewDbContext interviewDbContext;
 		private readonly string cvAttachmentFolderName;
 		private readonly string oldHrtoolStoragePath;
 		private string organizationalUnitId;
 		private readonly string userId;
 		private readonly UploadFileFromLink uploadFileFromLink;
 
-		public MigrationApplication(IConfiguration configuration)
+		public MigrationApplicationToApplicationService(IConfiguration configuration)
 		{
 			hrToolDbContext = new HrToolv1DbContext(configuration);
 			candidateDbContext = new CandidateDbContext(configuration);
-			interviewDbContext = new InterviewDbContext(configuration);
 			uploadFileFromLink = new UploadFileFromLink(configuration.GetSection("AzureStorage:StorageConnectionString")?.Value);
 			cvAttachmentFolderName = configuration.GetSection("AzureStorage:CvAttachmentContainerName")?.Value;
 			oldHrtoolStoragePath = configuration.GetSection("OldHrtoolStoragePath")?.Value;
@@ -89,19 +87,8 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 				if (!candidateDbContext.Applications.Any(x => x.Id == a.Id))
 				{
 					await candidateDbContext.ApplicationCollection.InsertOneAsync(a);
+					totalApplications++;
 				}
-				else
-				{
-					await candidateDbContext.ApplicationCollection.ReplaceOneAsync((x => x.Id == a.Id), a);
-				}
-				if (!interviewDbContext.Applications.Any(x => x.Id == a.Id))
-				{
-					await interviewDbContext.ApplicationCollection.InsertOneAsync(new MongoDatabase.Domain.Interview.AggregatesModel.Application
-					{
-						Id = app.Id.ToString()
-					});
-				}
-				totalApplications++;
 			}
 			return totalApplications;
 		}

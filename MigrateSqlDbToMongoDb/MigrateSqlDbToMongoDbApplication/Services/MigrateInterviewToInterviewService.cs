@@ -28,7 +28,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                     var candidateApplication = (from jobApplication in hrToolDbContext.JobApplications
                                                  join candidate in hrToolDbContext.Candidates on jobApplication.CandidateId equals candidate.ExternalId
                                                  join job in hrToolDbContext.Jobs on jobApplication.JobId equals job.ExternalId
-                                                 where jobApplication.ExternalId == item.Id
+                                                 where jobApplication.ExternalId == item.JobApplicationId
                                                 select new CandidateApplicationModel
                                                 {
                                                     CandidateId = candidate.Id.ToString(),

@@ -1,12 +1,17 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using System;
 using System.Collections.Generic;
 
 namespace MongoDatabaseHrToolv1.Model
 {
     public partial class Interview
-    {
-        public int Id { get; set; }
-        public int JobApplicationId { get; set; }
+	{
+		[BsonElement("_id")]
+		public ObjectId Id { get; set; }
+		[BsonElement("Id")]
+		public int ExternalId { get; set; }
+		public int JobApplicationId { get; set; }
         public int InterviewRoundId { get; set; }
         public int JobId { get; set; }
         public int? Result { get; set; }

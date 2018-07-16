@@ -24,13 +24,13 @@ namespace MigrateSqlDbToMongoDbApplication
 
 			Task.Run(async () =>
 			{
-				await MigrateJob();
-				await MigrateOrganizationalUnit();
-				await MigrateOffer();
+				//await MigrateJob();
+				//await MigrateOrganizationalUnit();
+				//await MigrateOffer();
 				//await MigrateEmail();
+				//await MigrationApplication();
+				await MigrateSchedule();
 			});
-			MigrateCandidate();
-			MigrationApplication();
 			Console.ReadKey();
 
 		}
@@ -62,11 +62,17 @@ namespace MigrateSqlDbToMongoDbApplication
 			Console.WriteLine("{0} candidate(s) inserted to ScheduleService", insertCandidateToScheduleService);
 		}
 
-		static void MigrationApplication()
+		static async Task MigrationApplication()
 		{
-			var applicationService = new MigrationApplication(configuration);
-			var totalApplications = applicationService.ExecuteAsync().Result;
-			Console.WriteLine($"{totalApplications} application(s) inserted to CandidateService");
+			var applicationService = new MigrationApplicationToApplicationService(configuration);
+			Console.WriteLine("Start migrate appication to Application Service.....");
+			var totalApplicationsToCandidate = await applicationService.ExecuteAsync();
+			Console.WriteLine($"{totalApplicationsToCandidate} application(s) inserted to Candidate Service");
+
+			var applicationToInterviewService = new MigrationApplicationToInterviewService(configuration);
+			Console.WriteLine("Start migrate appication to Interview Service.....");
+			var totalApplicationsToInterview = await applicationToInterviewService.ExecuteAsync();
+			Console.WriteLine($"{totalApplicationsToInterview} application(s) inserted to Interview Service");
 		}
 
 		static async Task MigrateJob()
@@ -123,9 +129,17 @@ namespace MigrateSqlDbToMongoDbApplication
 		static async Task MigrateEmail()
 		{
 			Console.WriteLine("Start migrate Emails.....");
-			var migrateEmailService = new MigrationEmailService(configuration);
+			var migrateEmailService = new MigrationEmailToEmailService(configuration);
 			var totalEmails = await migrateEmailService.ExecuteAsync();
-			Console.WriteLine($"Migrate {totalEmails} emails ");
+			Console.WriteLine($"Migrate {totalEmails} emails to Email service");
+		}
+
+		static async Task MigrateSchedule()
+		{
+			Console.WriteLine("Start migrate Schedule.....");
+			var migrateScheduleService = new MigrationScheduleToScheduleService(configuration);
+			var totalEmails = await migrateScheduleService.ExecuteAsync();
+			Console.WriteLine($"Migrate {totalEmails} schedule to Schedule service");
 		}
 	}
 }
