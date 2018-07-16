@@ -1,10 +1,9 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using System;
 
 namespace MongoDatabaseHrToolv1.Model
 {
-    public class ContractCode
+	public class ContractCode
     {
         [BsonElement("_id")]
         public ObjectId Id { get; set; }
