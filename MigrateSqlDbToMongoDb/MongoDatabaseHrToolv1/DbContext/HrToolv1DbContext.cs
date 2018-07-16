@@ -61,5 +61,11 @@ namespace MongoDatabaseHrToolv1.DbContext
 
         private IMongoCollection<LetterTemplate> LetterTemplateCollection => _database.GetCollection<LetterTemplate>(nameof(LetterTemplate));
         public IQueryable<LetterTemplate> LetterTemplates => LetterTemplateCollection.AsQueryable();
-    }
+		
+		public IMongoCollection<EmailTracking> EmailTrackingCollection => _database.GetCollection<EmailTracking>(nameof(EmailTracking));
+		public IQueryable<EmailTracking> EmailTrackings => EmailTrackingCollection.AsQueryable();
+
+		public IMongoCollection<EmailTrackingAttachment> EmailTrackingAttachmentCollection => _database.GetCollection<EmailTrackingAttachment>(nameof(EmailTrackingAttachment));
+		public IQueryable<EmailTrackingAttachment> EmailTrackingAttachments => EmailTrackingAttachmentCollection.AsQueryable();
+	}
 }
