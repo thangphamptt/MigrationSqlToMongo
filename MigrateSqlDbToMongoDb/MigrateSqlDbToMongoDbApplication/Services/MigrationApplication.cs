@@ -14,7 +14,8 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 {
 	public class MigrationApplication
 	{
-		private HrToolv1DbContext hrToolDbContext;
+        private IConfiguration configuration;
+        private HrToolv1DbContext hrToolDbContext;
 		private CandidateDbContext candidateDbContext;
 		private InterviewDbContext interviewDbContext;
 		private readonly string cvAttachmentFolderName;
@@ -23,8 +24,9 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 		private readonly string userId;
 		private readonly UploadFileFromLink uploadFileFromLink;
 
-		public MigrationApplication(IConfiguration configuration)
+		public MigrationApplication(IConfiguration _configuration)
 		{
+            configuration = _configuration;
 			hrToolDbContext = new HrToolv1DbContext(configuration);
 			candidateDbContext = new CandidateDbContext(configuration);
 			interviewDbContext = new InterviewDbContext(configuration);
@@ -94,6 +96,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 				{
 					await candidateDbContext.ApplicationCollection.ReplaceOneAsync((x => x.Id == a.Id), a);
 				}
+
 				if (!interviewDbContext.Applications.Any(x => x.Id == a.Id))
 				{
 					await interviewDbContext.ApplicationCollection.InsertOneAsync(new MongoDatabase.Domain.Interview.AggregatesModel.Application
@@ -104,7 +107,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 				totalApplications++;
 			}
 			return totalApplications;
-		}
+		}       
 
 		private PipelineStage GetPipeline(Pipeline pipeline, int? status)
 		{

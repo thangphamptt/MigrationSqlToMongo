@@ -7,125 +7,204 @@ using System.Threading.Tasks;
 
 namespace MigrateSqlDbToMongoDbApplication
 {
-	class Program
-	{
-		private static IConfiguration configuration;
+    class Program
+    {
+        private static IConfiguration configuration;
 
-		private static void Configuration()
-		{
-			var builder = new ConfigurationBuilder()
-				 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-			configuration = builder.Build();
-		}
+        private static void Configuration()
+        {
+            var builder = new ConfigurationBuilder()
+                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+            configuration = builder.Build();
+        }
 
-		static void Main(string[] args)
-		{
-			Configuration();
+        static void Main(string[] args)
+        {
+            Configuration();
 
-			Task.Run(async () =>
-			{
-				await MigrateJob();
-				await MigrateOrganizationalUnit();
-				await MigrateOffer();
-				//await MigrateEmail();
-			});
-			MigrateCandidate();
-			MigrationApplication();
-			Console.ReadKey();
+            MigrateOrganizationalUnit();
+            MigrateCandidate();
+            MigrateApplication();
+            MigrateJob();
+            MigrateOffer();
+            MigrateTemplate();
+            MigrateEmail();
+            Console.ReadKey();
+        }
 
-		}
+        static void MigrateCandidate()
+        {
+            HrToolv1DbContext hrToolDbContext = new HrToolv1DbContext(configuration);
+            var candidates = hrToolDbContext.Candidates.ToList();
+            var migrateCandidate = new MigrateCandidateToCandidateService();
 
-		static void MigrateCandidate()
-		{
-			HrToolv1DbContext hrToolDbContext = new HrToolv1DbContext(configuration);
-			var candidates = hrToolDbContext.Candidates.ToList();
-			var migrateCandidate = new MigrateCandidateToCandidateService();
+            Task.Run(async () =>
+            {
+                Console.WriteLine("========================================================= \n");
+                Console.WriteLine("Migrate [candidate] to [Candidate Services] => Starting...");
+                var insertCandidateToCandidateService = await migrateCandidate.InsertCandidateToCandidateService(configuration, candidates);
+                Console.WriteLine($"Migrate [candidate] to [Candidate Services] => DONE: inserted {insertCandidateToCandidateService} Candidates.\n");
+            });
 
-			Console.WriteLine("Start migrate candidate to Services.....");
+            Task.Run(async () =>
+            {
+                Console.WriteLine("Migrate [candidate] to [Interview Services] => Starting...");
+                var insertCandidateToInterviewService = await migrateCandidate.InsertCandidateToInterviewService(configuration, candidates);
+                Console.WriteLine($"Migrate [candidate] to [Interview Services] => DONE: inserted {insertCandidateToInterviewService} candidates.\n");
+            });
 
-			var insertCandidateToCandidateService = migrateCandidate.InsertCandidateToCandidateService(configuration, candidates).Result;
-			Console.WriteLine("{0} candidate(s) inserted to CandidateService", insertCandidateToCandidateService);
+            Task.Run(async () =>
+            {
+                Console.WriteLine("Migrate [candidate] to [Job Services] => Starting...");
+                var insertCandidateToJobService = await migrateCandidate.InsertCandidateToJobService(configuration, candidates);
+                Console.WriteLine($"Migrate [candidate] to [Job Services] => DONE: inserted {insertCandidateToJobService} candidates.\n");
+            });
 
-			var insertCandidateToInterviewService = migrateCandidate.InsertCandidateToInterviewService(configuration, candidates).Result;
-			Console.WriteLine("{0} candidate(s) inserted to InterviewService", insertCandidateToInterviewService);
+            Task.Run(async () =>
+            {
+                Console.WriteLine("Migrate [candidate] to [Job Matching Services] => Starting...");
+                var insertCandidateToJobMatchingService = await migrateCandidate.InsertCandidateToJobMatchingService(configuration, candidates);
+                Console.WriteLine($"Migrate [candidate] to [Job Matching Services] => DONE: inserted {insertCandidateToJobMatchingService} candidates.\n");
+            });
 
-			var insertCandidateToJobService = migrateCandidate.InsertCandidateToJobService(configuration, candidates).Result;
-			Console.WriteLine("{0} candidate(s) inserted to JobService", insertCandidateToJobService);
+            Task.Run(async () =>
+            {
+                Console.WriteLine("Migrate [candidate] to [Offer Services] => Starting...");
+                var insertCandidateToOfferService = await migrateCandidate.InsertCandidateToOfferService(configuration, candidates);
+                Console.WriteLine($"Migrate [candidate] to [Offer Services] => DONE: inserted {insertCandidateToOfferService} candidates.\n");
+            });
 
-			var insertCandidateToJobMatchingService = migrateCandidate.InsertCandidateToJobMatchingService(configuration, candidates).Result;
-			Console.WriteLine("{0} candidate(s) inserted to JobMatchingService", insertCandidateToJobMatchingService);
+            Task.Run(async () =>
+            {
+                Console.WriteLine("Migrate [candidate] to [Schedule Services] => Starting...");
+                var insertCandidateToScheduleService = await migrateCandidate.InsertCandidateToScheduleService(configuration, candidates);
+                Console.WriteLine($"Migrate [candidate] to [Schedule Services] => DONE: inserted {insertCandidateToScheduleService} candidates.\n");
+            });
+        }
 
-			var insertCandidateToOfferService = migrateCandidate.InsertCandidateToOfferService(configuration, candidates).Result;
-			Console.WriteLine("{0} candidate(s) inserted to OfferService", insertCandidateToOfferService);
+        static void MigrateApplication()
+        {
+            Task.Run(async () =>
+            {
+                Console.WriteLine("========================================================\n");
+                Console.WriteLine("Migrate [application] to [Candidate Services] => Starting...");
+                var applicationService = new MigrationApplication(configuration);
+                var totalApplications = await applicationService.ExecuteAsync();
+                Console.WriteLine($"Migrate [application] to [Candidate Services] => DONE: inserted {totalApplications} applications.\n");
+            });
+        }
 
-			var insertCandidateToScheduleService = migrateCandidate.InsertCandidateToScheduleService(configuration, candidates).Result;
-			Console.WriteLine("{0} candidate(s) inserted to ScheduleService", insertCandidateToScheduleService);
-		}
+        static void MigrateJob()
+        {
+            Task.Run(async () =>
+            {
+                Console.WriteLine("========================================================\n");
+                Console.WriteLine("Migrate [job] to [Job Service] => Starting.....");
+                var migrateJobToJobService = new MigrateJobToJobService();
+                var jobs = await migrateJobToJobService.Execute(configuration);
+                Console.WriteLine($"Migrate [job] to [Job Service] => DONE: inserted {jobs} jobs.\n");
+            });
 
-		static void MigrationApplication()
-		{
-			var applicationService = new MigrationApplication(configuration);
-			var totalApplications = applicationService.ExecuteAsync().Result;
-			Console.WriteLine($"{totalApplications} application(s) inserted to CandidateService");
-		}
+            Task.Run(async () =>
+            {
+                Console.WriteLine("Migrate [job] to [Candidate Service] => Starting.....");
+                var migrateJobToCandidateService = new MigrateJobToCandidateService();
+                var jobs = await migrateJobToCandidateService.Execute(configuration);
+                Console.WriteLine($"Migrate [job] to [Candidate Service] => DONE: inserted {jobs} jobs.\n");
+            });
 
-		static async Task MigrateJob()
-		{
-			Console.WriteLine("Start migrate job to Job Service.....");
-			var migrateJobToJobService = new MigrateJobToJobService();
-			var jobs = await migrateJobToJobService.Execute(configuration);
-			Console.WriteLine("Migrate job to Job Service Succeed {0} records \n", jobs);
+            Task.Run(async () =>
+            {
+                Console.WriteLine("Migrate [job] to [Interview Service] => Starting.....");
+                var migrateJobToInterviewService = new MigrateJobToInterviewService();
+                var jobs = await migrateJobToInterviewService.Execute(configuration);
+                Console.WriteLine($"Migrate [job] to [Interview Service] => DONE: inserted {jobs} jobs.\n");
+            });
 
-			Console.WriteLine("Start migrate job to Candidate Service.....");
-			var migrateJobToCandidateService = new MigrateJobToCandidateService();
-			jobs = await migrateJobToCandidateService.Execute(configuration);
-			Console.WriteLine("Migrate job to Candidate Service Succeed {0} records \n", jobs);
+            Task.Run(async () =>
+            {
+                Console.WriteLine("Migrate [job] to [Offer Service] => Starting.....");
+                var migrateJobToOfferService = new MigrateJobToOfferService();
+                var jobs = await migrateJobToOfferService.Execute(configuration);
+                Console.WriteLine($"Migrate [job] to [Offer Service] => DONE: inserted {jobs} jobs.\n");
+            });
+        }
 
-			Console.WriteLine("Start migrate job to Interview Service.....");
-			var migrateJobToInterviewService = new MigrateJobToInterviewService();
-			jobs = await migrateJobToInterviewService.Execute(configuration);
-			Console.WriteLine("Migrate job to Interview Service Succeed {0} records \n", jobs);
+        static void MigrateOrganizationalUnit()
+        {
+            Task.Run(async () =>
+            {
+                Console.WriteLine("=====================================================");
+                Console.WriteLine("Migrate [organizationalUnit] => Starting...");
+                var companyId = configuration.GetSection("CompanySetting:Id").Value;
+                var companyName = configuration.GetSection("CompanySetting:Name").Value;
+                var organizationalUnitService = new OrganizationalUnitService.OrganizationalUnitService(configuration);
+                var organizationalUnits = await organizationalUnitService.AddOrganizationalUnit(companyId, companyName);
+                if (organizationalUnits.Count != 0)
+                {
+                    Console.WriteLine("{0} OrganizationalUnit(s) added succesfully.", organizationalUnits.Count);
+                    foreach (var item in organizationalUnits)
+                    {
+                        Console.WriteLine("-------{0}-------", item);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("OrganizationalUnit existed.\n");
+                }
+            });
+        }
 
-			Console.WriteLine("Start migrate job to Offer Service.....");
-			var migrateJobToOfferService = new MigrateJobToOfferService();
-			jobs = await migrateJobToOfferService.Execute(configuration);
-			Console.WriteLine("Migrate job to Offer Service Succeed {0} records \n", jobs);
-		}
+        static void MigrateOffer()
+        {
+            Task.Run(async () =>
+            {
+                Console.WriteLine("=====================================================");
+                Console.WriteLine("Migrate [offer] to [Offer Service] => Starting.....");
+                var migrateOfferToOfferService = new MigrateOfferToOfferService();
+                var offers = await migrateOfferToOfferService.Execute(configuration);
+                Console.WriteLine($"Migrate [offer] to [Offer Service] => DONE: inserted {offers} offers.\n");
+            });
+        }
 
-		static async Task MigrateOrganizationalUnit()
-		{
-			var companyId = configuration.GetSection("CompanySetting:Id").Value;
-			var companyName = configuration.GetSection("CompanySetting:Name").Value;
-			var organizationalUnitService = new OrganizationalUnitService.OrganizationalUnitService(configuration);
-			var organizationalUnits = await organizationalUnitService.AddOrganizationalUnit(companyId, companyName);
-			if (organizationalUnits.Count != 0)
-			{
-				Console.WriteLine("{0} OrganizationalUnit(s) added succesfully.", organizationalUnits.Count);
-				foreach (var item in organizationalUnits)
-				{
-					Console.WriteLine("-------{0}-------", item);
-				}
-			}
-			else
-			{
-				Console.WriteLine("OrganizationalUnit existed.\n");
-			}
-		}
+        static void MigrateTemplate()
+        {
+            Task.Run(async () =>
+            {
+                Console.WriteLine("========================================================\n");
+                Console.WriteLine("Migrate [template] to [Template Service] => Starting.....");
+                var migrateTemplateToTemplateService = new MigrateTemplateToTemplateService();
+                var templates = await migrateTemplateToTemplateService.Execute(configuration);
+                Console.WriteLine($"Migrate [template] to [Template Service] => DONE: inserted {templates} jobs.\n");
+            });
 
-		static async Task MigrateOffer()
-		{
-			Console.WriteLine("Start migrate [offer] to [Offer Service].....");
-			var migrateOfferToOfferService = new MigrateOfferToOfferService();
-			var offers = migrateOfferToOfferService.Execute(configuration);
-			Console.WriteLine("Migrate [offer] to [Offer Service] Succeed {0} records \n", offers);
-		}
+            Task.Run(async () =>
+            {
+                Console.WriteLine("Migrate [template] to [Candidate Service] => Starting.....");
+                var migrateTemplateToCandidateService = new MigrateTemplateToCandidateService();
+                var templatesCandidate = await migrateTemplateToCandidateService.Execute(configuration);
+                Console.WriteLine($"Migrate [template] to [Candidate Service] => DONE: inserted {templatesCandidate} jobs.\n");
+            });
 
-		static async Task MigrateEmail()
-		{
-			Console.WriteLine("Start migrate Emails.....");
-			var migrateEmailService = new MigrationEmailService(configuration);
-			var totalEmails = await migrateEmailService.ExecuteAsync();
-			Console.WriteLine($"Migrate {totalEmails} emails ");
-		}
-	}
+            Task.Run(async () =>
+            {
+                Console.WriteLine("Migrate [template] to [Interview Service] => Starting.....");
+                var migrateTemplateToInterviewService = new MigrateTemplateToInterviewService();
+                var templatesInterview = await migrateTemplateToInterviewService.Execute(configuration);
+                Console.WriteLine($"Migrate [template] to [Interview Service] => DONE: inserted {templatesInterview} jobs.\n");
+            });
+        }
+
+        static void MigrateEmail()
+        {
+            Task.Run(async () =>
+            {
+                Console.WriteLine("========================================================\n");
+                Console.WriteLine("Migrate [Email] to [Email Service] => Starting...");
+                var migrateEmailService = new MigrationEmailService(configuration);
+                var totalEmails = await migrateEmailService.ExecuteAsync();
+                Console.WriteLine($"Migrate [Email] to [Email Service] => DONE: inserted {totalEmails} emails. \n");
+            });
+        }
+    }
 }
