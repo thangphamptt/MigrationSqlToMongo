@@ -4,7 +4,7 @@ using System;
 
 namespace MongoDatabaseHrToolv1.Model
 {
-	public partial class JobApplication
+	public class JobApplication
 	{
 		[BsonElement("_id")]
 		public ObjectId Id { get; set; }

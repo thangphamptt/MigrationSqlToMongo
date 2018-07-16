@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace MongoDatabaseHrToolv1.Model
 {
-	public partial class Skill
+	public class Skill
 	{
 		[BsonElement("_id")]
 		public ObjectId Id { get; set; }

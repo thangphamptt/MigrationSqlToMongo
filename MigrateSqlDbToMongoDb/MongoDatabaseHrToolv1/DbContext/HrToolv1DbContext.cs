@@ -67,5 +67,8 @@ namespace MongoDatabaseHrToolv1.DbContext
 
 		public IMongoCollection<EmailTrackingAttachment> EmailTrackingAttachmentCollection => _database.GetCollection<EmailTrackingAttachment>(nameof(EmailTrackingAttachment));
 		public IQueryable<EmailTrackingAttachment> EmailTrackingAttachments => EmailTrackingAttachmentCollection.AsQueryable();
+
+		public IMongoCollection<InterviewSchedule> InterviewScheduleCollection => _database.GetCollection<InterviewSchedule>(nameof(InterviewSchedule));
+		public IQueryable<InterviewSchedule> InterviewSchedules => InterviewScheduleCollection.AsQueryable();
 	}
 }

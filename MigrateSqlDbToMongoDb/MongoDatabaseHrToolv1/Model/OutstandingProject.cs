@@ -4,7 +4,7 @@ using System;
 
 namespace MongoDatabaseHrToolv1.Model
 {
-	public partial class OutstandingProject
+	public class OutstandingProject
 	{
 		[BsonElement("_id")]
 		public ObjectId Id { get; set; }
