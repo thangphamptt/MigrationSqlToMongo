@@ -7,6 +7,7 @@ using TemplateDomainModel = MongoDatabase.Domain.Template.AggregatesModel;
 using HrToolDomainModel = MongoDatabaseHrToolv1.Model;
 using System;
 using System.Collections.Generic;
+using MongoDB.Driver;
 
 namespace MigrateSqlDbToMongoDbApplication.Services
 {
@@ -29,7 +30,8 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                 var letterTemplates = hrToolDbContext.LetterTemplates.ToList();
                 foreach (var letterTemplate in letterTemplates)
                 {
-                    bool hasOfferExisted = templateDbContext.Templates.Any(w => w.Id == letterTemplate.Id.ToString());
+                    bool hasOfferExisted = templateDbContext.Templates.OfType<TemplateDomainModel.EmailTemplate>()
+                        .Any(w => w.Id == letterTemplate.Id.ToString());
                     if (!hasOfferExisted)
                     {
                         var emailTemplateType = GetEmailTemplateType(letterTemplate.Type);
@@ -38,7 +40,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                         var template = new TemplateDomainModel.EmailTemplate()
                         {
                             Id = letterTemplate.Id.ToString(),
-                            Attachments = null,
+                            Attachments = new List<TemplateDomainModel.Attachment>(),
                             Body = letterTemplate.Detail,
                             CreatedDate = DateTime.Now,
                             CreatedByUserId = userId,
@@ -52,7 +54,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 
                         listTemplate.Add(template);
                         //Migrate job to Candidate service
-                        //await templateDbContext.TemplateCollection.InsertOneAsync(template);
+                        await templateDbContext.TemplateCollection.InsertOneAsync(template);
                         dataInserted++;
                     }
                 }
