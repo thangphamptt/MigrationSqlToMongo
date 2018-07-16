@@ -42,8 +42,11 @@ namespace MongoDatabaseHrToolv1.DbContext
         private IMongoCollection<Contract> ContractCollection => _database.GetCollection<Contract>(nameof(Contract));
         public IQueryable<Contract> Contracts => ContractCollection.AsQueryable();
 
-		#region CV
-		private IMongoCollection<Education> EducationCollection => _database.GetCollection<Education>(nameof(Education));
+        private IMongoCollection<Interview> InterviewCollection => _database.GetCollection<Interview>(nameof(Interview));
+        public IQueryable<Interview> Interviews => InterviewCollection.AsQueryable();
+
+        #region CV
+        private IMongoCollection<Education> EducationCollection => _database.GetCollection<Education>(nameof(Education));
 		public IQueryable<Education> Educations => EducationCollection.AsQueryable();
 
 		private IMongoCollection<EmploymentHistory> EmploymentHistoryCollection => _database.GetCollection<EmploymentHistory>(nameof(EmploymentHistory));
