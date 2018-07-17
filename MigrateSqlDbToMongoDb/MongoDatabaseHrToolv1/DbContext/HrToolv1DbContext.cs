@@ -61,6 +61,9 @@ namespace MongoDatabaseHrToolv1.DbContext
 		private IMongoCollection<JobApplicationAttachment> JobApplicationAttachmentCollection => _database.GetCollection<JobApplicationAttachment>(nameof(JobApplicationAttachment));
 		public IQueryable<JobApplicationAttachment> JobApplicationAttachments => JobApplicationAttachmentCollection.AsQueryable();
         #endregion
+
+        private IMongoCollection<LetterTemplate> LetterTemplateCollection => _database.GetCollection<LetterTemplate>(nameof(LetterTemplate));
+        public IQueryable<LetterTemplate> LetterTemplates => LetterTemplateCollection.AsQueryable();
 		
 		public IMongoCollection<EmailTracking> EmailTrackingCollection => _database.GetCollection<EmailTracking>(nameof(EmailTracking));
 		public IQueryable<EmailTracking> EmailTrackings => EmailTrackingCollection.AsQueryable();

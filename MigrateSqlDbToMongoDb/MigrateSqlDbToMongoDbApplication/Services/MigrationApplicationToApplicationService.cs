@@ -14,7 +14,8 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 {
 	public class MigrationApplicationToApplicationService
 	{
-		private HrToolv1DbContext hrToolDbContext;
+        private IConfiguration configuration;
+        private HrToolv1DbContext hrToolDbContext;
 		private CandidateDbContext candidateDbContext;
 		private readonly string cvAttachmentFolderName;
 		private readonly string oldHrtoolStoragePath;
@@ -22,8 +23,9 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 		private readonly string userId;
 		private readonly UploadFileFromLink uploadFileFromLink;
 
-		public MigrationApplicationToApplicationService(IConfiguration configuration)
+		public MigrationApplicationToApplicationService(IConfiguration _configuration)
 		{
+            configuration = _configuration;
 			hrToolDbContext = new HrToolv1DbContext(configuration);
 			candidateDbContext = new CandidateDbContext(configuration);
 			uploadFileFromLink = new UploadFileFromLink(configuration.GetSection("AzureStorage:StorageConnectionString")?.Value);
@@ -87,11 +89,12 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 				if (!candidateDbContext.Applications.Any(x => x.Id == a.Id))
 				{
 					await candidateDbContext.ApplicationCollection.InsertOneAsync(a);
+
 					totalApplications++;
 				}
 			}
 			return totalApplications;
-		}
+		}       
 
 		private PipelineStage GetPipeline(Pipeline pipeline, int? status)
 		{

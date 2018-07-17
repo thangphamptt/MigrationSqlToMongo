@@ -27,7 +27,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 			}
 		}
 
-		public int Execute(IConfiguration configuration)
+		public async Task<int> Execute(IConfiguration configuration)
 		{
 			hrToolDbContext = new HrToolv1DbContext(configuration);
 			var offerDbContext = new OfferDbContext(configuration);
@@ -79,8 +79,10 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 							IsUpdate = false
 						};
 						listOffer.Add(offer);
+
 						//Migrate job to Candidate service
-						//await offerDbContext.OfferCollection.InsertOneAsync(offer);
+						await offerDbContext.OfferCollection.InsertOneAsync(offer);
+
 						dataInserted++;
 					}
 				}
