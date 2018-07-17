@@ -22,16 +22,20 @@ namespace MigrateSqlDbToMongoDbApplication
 		{
 			Configuration();
 
-			Task.Run(async () =>
-			{
-				//await MigrateJob();
-				//await MigrateOrganizationalUnit();
-				//await MigrateOffer();
-				//await MigrateEmail();
-				//await MigrationApplication();
-				await MigrateSchedule();
-			});
-			Console.ReadKey();
+            Task.Run(async () =>
+            {
+                await MigrateJob();
+                await MigrateOrganizationalUnit();
+                await MigrateOffer();
+                await MigrateEmail();
+                await MigrationApplication();
+                await MigrateSchedule();
+            });
+            MigrateCandidate();
+            MigrationApplication();
+            MigrateInterview();
+
+            Console.ReadKey();
 
 		}
 
@@ -141,5 +145,13 @@ namespace MigrateSqlDbToMongoDbApplication
 			var totalEmails = await migrateScheduleService.ExecuteAsync();
 			Console.WriteLine($"Migrate {totalEmails} schedule to Schedule service");
 		}
+
+        static void MigrateInterview()
+        {
+            Console.WriteLine("Start migrate Interviews.....");
+            var migrateInterviewService = new MigrateInterviewToInterviewService();
+            var totalInterview = migrateInterviewService.InsertInterviewToInterviewService(configuration).Result;
+            Console.WriteLine("{0} interview(s) inserted to InterviewService", totalInterview);
+        }
 	}
 }

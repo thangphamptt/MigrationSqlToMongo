@@ -83,7 +83,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 				CandidateId = candidate.Id.ToString(),
 				Interviewer = user.Email,
 				InterviewType = interviewType.Id.ToString(),
-				CreatedDate = new DateTime(),
+				CreatedDate = fromDate.AddDays(-7),
 				Description = item.ContentSchedule,
 				Duration = CalculateDuration(fromDate, toDate),
 				End = toDate,
