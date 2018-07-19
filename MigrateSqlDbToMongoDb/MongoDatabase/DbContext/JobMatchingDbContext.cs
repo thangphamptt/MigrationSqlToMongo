@@ -1,13 +1,14 @@
-﻿using MongoDB.Driver;
+﻿using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
 using System.Linq;
 
 namespace MongoDatabase.DbContext
 {
-	public class JobMatchingDbContext 
+    public class JobMatchingDbContext
     {
         private readonly IMongoDatabase _database;
 
-        public JobMatchingDbContext(Microsoft.Extensions.Configuration.IConfiguration configuration)
+        public JobMatchingDbContext(IConfiguration configuration)
         {
             var client = new MongoClient(configuration.GetSection("MongoDB:ConnectionString").Value);
             _database = client.GetDatabase(configuration.GetSection("MongoDB:JobMatchingDatabaseName").Value);

@@ -2,75 +2,101 @@
 using MigrateSqlDbToMongoDbApplication.Common.Services;
 using MongoDatabase.DbContext;
 using MongoDatabaseHrToolv1.DbContext;
-using System.Linq;
-using MongoDB.Driver;
-using MongoDB.Driver.Linq;
-using System.Collections.Generic;
+using MongoDB.Bson;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace MigrateSqlDbToMongoDbApplication.Services
 {
-    public class MigrationEmailToEmailService
+    public class MigrateEmailService
     {
-        private readonly HrToolv1DbContext hrToolDbContext;
-        private readonly EmailDbContext emailDbContext;
-        private readonly CandidateDbContext candidateDbContext;
+        private HrToolv1DbContext _hrToolDbContext;
+        private EmailDbContext _emailDbContext;
+        private CandidateDbContext _candidateDbContext;
+
+        private List<MongoDatabaseHrToolv1.Model.EmailTracking> emailData;
         private readonly string emailAttachmentContainName;
         private readonly string oldHrtoolStoragePath;
-        private readonly string organizationalUnitId;
-        private readonly string userId;
-        private readonly UploadFileFromLink uploadFileFromLink;
+        private string organizationalUnitId;
+        private string userId;
+        private UploadFileFromLink uploadFileFromLink;
 
-        public MigrationEmailToEmailService(IConfiguration configuration)
+        public MigrateEmailService(IConfiguration configuration,
+            HrToolv1DbContext hrToolDbContext,
+            EmailDbContext emailDbContext,
+            CandidateDbContext candidateDbContext)
         {
-            hrToolDbContext = new HrToolv1DbContext(configuration);
-            candidateDbContext = new CandidateDbContext(configuration);
-            emailDbContext = new EmailDbContext(configuration);
+            _hrToolDbContext = hrToolDbContext;
+            _emailDbContext = emailDbContext;
+            _candidateDbContext = candidateDbContext;
+
             uploadFileFromLink = new UploadFileFromLink(configuration.GetSection("AzureStorage:StorageConnectionString")?.Value);
             emailAttachmentContainName = configuration.GetSection("AzureStorage:EmailAttachmentContainName")?.Value;
             oldHrtoolStoragePath = configuration.GetSection("OldHrtoolStoragePath")?.Value;
             organizationalUnitId = configuration.GetSection("CompanySetting:Id")?.Value;
             userId = configuration.GetSection("AdminUser:Id")?.Value;
+
+            emailData = hrToolDbContext.EmailTrackings
+                .Where(x => x.TypeOfEmail == "Scheduling Email"
+                || x.TypeOfEmail == "Offer Email"
+                || x.TypeOfEmail == "Thank You Email")
+                .ToList();
         }
 
-        public async Task<int> ExecuteAsync()
+        public async Task ExecuteAsync()
         {
-            var totalEmails = 0;
-            var interiewEmails = await hrToolDbContext.EmailTrackingCollection.AsQueryable().Where(x => x.TypeOfEmail == "Scheduling Email").ToListAsync();
-            foreach (var email in interiewEmails)
-            {
-                if (!emailDbContext.Emails.Any(x => x.Id == email.Id.ToString()))
-                {
-                    await emailDbContext.EmailCollection.InsertOneAsync(InterviewEmail(email));
-                    totalEmails++;
-                }
-            }
-            var offerEmails = await hrToolDbContext.EmailTrackingCollection.AsQueryable().Where(x => x.TypeOfEmail == "Offer Email").ToListAsync();
-            foreach (var email in offerEmails)
-            {
-                if (!emailDbContext.Emails.Any(x => x.Id == email.Id.ToString()))
-                {
-                    await emailDbContext.EmailCollection.InsertOneAsync(await OfferMail(email));
-                    totalEmails++;
-                }
-            }
+            await MigrateEmailToEmailService();
+        }
 
-            var thankyouEmails = await hrToolDbContext.EmailTrackingCollection.AsQueryable().Where(x => x.TypeOfEmail == "Thank You Email").ToListAsync();
-            foreach (var email in thankyouEmails)
+        private async Task MigrateEmailToEmailService()
+        {
+            Console.WriteLine("Migrate [email] to [Email service] => Starting...");        
+
+            var emailIdsDestination = _emailDbContext.Emails.Select(s => s.Id).ToList();
+            var emailSource = emailData.Where(w => !emailIdsDestination.Contains(w.Id.ToString())).ToList();
+            if (emailSource != null && emailSource.Count > 0)
             {
-                if (!emailDbContext.Emails.Any(x => x.Id == email.Id.ToString()))
+                int count = 0;
+                var interiewEmails = emailSource.Where(x => x.TypeOfEmail == "Scheduling Email").ToList();
+                foreach (var email in interiewEmails)
                 {
-                    await emailDbContext.EmailCollection.InsertOneAsync(ThankyouEmail(email));
-                    totalEmails++;
+                    await _emailDbContext.EmailCollection.InsertOneAsync(InterviewEmail(email));
+
+                    count++;
+                    Console.Write($"\r {count}/{emailSource.Count}");
                 }
+
+                var offerEmails = emailSource.Where(x => x.TypeOfEmail == "Offer Email").ToList();
+                foreach (var email in offerEmails)
+                {
+                    await _emailDbContext.EmailCollection.InsertOneAsync(await OfferMail(email));
+
+                    count++;
+                    Console.Write($"\r {count}/{emailSource.Count}");
+                }
+
+                var thankyouEmails = emailSource.Where(x => x.TypeOfEmail == "Thank You Email").ToList();
+                foreach (var email in thankyouEmails)
+                {
+                    await _emailDbContext.EmailCollection.InsertOneAsync(ThankyouEmail(email));
+
+                    count++;
+                    Console.Write($"\r {count}/{emailSource.Count}");
+                }
+                Console.WriteLine($"\n Migrate [email] to [Email service] => DONE: inserted {emailSource.Count} applications. \n");
+
             }
-            return totalEmails;
+            else
+            {
+                Console.WriteLine($"Migrate [email] to [Email service] => DONE: data exsited. \n");
+            }
         }
 
         private MongoDatabase.Domain.Email.AggregatesModel.InterviewEmail InterviewEmail(MongoDatabaseHrToolv1.Model.EmailTracking email)
         {
-            var interview = hrToolDbContext.Interviews.FirstOrDefault(x => x.JobApplicationId == email.JobApplicationId);
+            var interview = _hrToolDbContext.Interviews.FirstOrDefault(x => x.JobApplicationId == email.JobApplicationId);
             return new MongoDatabase.Domain.Email.AggregatesModel.InterviewEmail
             {
                 Id = email.Id.ToString(),
@@ -98,7 +124,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 
         private async Task<MongoDatabase.Domain.Email.AggregatesModel.OfferEmail> OfferMail(MongoDatabaseHrToolv1.Model.EmailTracking email)
         {
-            var offer = hrToolDbContext.ContractCodes.Where(x => x.JobApplicationId == email.JobApplicationId)
+            var offer = _hrToolDbContext.ContractCodes.Where(x => x.JobApplicationId == email.JobApplicationId)
                 .OrderByDescending(x => x.ExternalId).FirstOrDefault();
 
             var newAttachments = await GetAttachments(new AttachmentInfo
@@ -126,7 +152,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
         private async Task<IList<MongoDatabase.Domain.Email.AggregatesModel.Attachment>> GetAttachments(AttachmentInfo info)
         {
             var results = new List<MongoDatabase.Domain.Email.AggregatesModel.Attachment>();
-            var attachments = hrToolDbContext.EmailTrackingAttachments.Where(x => x.EmailTrackingId == info.EmailTrackingId).Select(x => x);
+            var attachments = _hrToolDbContext.EmailTrackingAttachments.Where(x => x.EmailTrackingId == info.EmailTrackingId).Select(x => x).ToList();
             foreach (var attachment in attachments)
             {
                 var contentType = MimeMapping.MimeUtility.GetMimeMapping(attachment.Filename);
@@ -151,11 +177,10 @@ namespace MigrateSqlDbToMongoDbApplication.Services
         private class AttachmentInfo
         {
             public int EmailTrackingId { get; set; }
-            public MongoDB.Bson.ObjectId NewOfferId { get; set; }
+            public ObjectId NewOfferId { get; set; }
             public int OldOfferId { get; set; }
             public string ContainerFolder { get; set; }
             public string OldStoragePath { get; set; }
         }
-
     }
 }

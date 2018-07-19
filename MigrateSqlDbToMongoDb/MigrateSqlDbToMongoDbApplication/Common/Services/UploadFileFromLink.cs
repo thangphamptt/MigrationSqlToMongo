@@ -54,6 +54,7 @@ namespace MigrateSqlDbToMongoDbApplication.Common.Services
 					}
 					catch (Exception ex)
 					{
+                        Console.WriteLine(ex);
 						throw ex;
 					}
 				}
