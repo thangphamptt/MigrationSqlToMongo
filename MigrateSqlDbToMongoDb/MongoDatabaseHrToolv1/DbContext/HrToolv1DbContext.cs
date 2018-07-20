@@ -11,8 +11,8 @@ namespace MongoDatabaseHrToolv1.DbContext
 
         public HrToolv1DbContext(IConfiguration configuration)
         {
-            var client = new MongoClient(configuration.GetSection("MongoDB:ConnectionString").Value);
-            _database = client.GetDatabase(configuration.GetSection("MongoDB:HrToolv1DatabaseName").Value);
+            var client = new MongoClient(configuration.GetSection("HrToolV1:ConnectionString").Value);
+            _database = client.GetDatabase(configuration.GetSection("HrToolV1:HrToolv1DatabaseName").Value);
         }
 
         private IMongoCollection<Job> JobCollection => _database.GetCollection<Job>(nameof(Job));
