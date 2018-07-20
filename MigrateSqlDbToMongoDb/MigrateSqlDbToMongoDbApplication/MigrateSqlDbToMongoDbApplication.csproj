@@ -18,6 +18,7 @@
     <ProjectReference Include="..\Infranstructure\Infranstructure.csproj" />
     <ProjectReference Include="..\MongoDatabase\MongoDatabase.csproj" />
     <ProjectReference Include="..\MongoDatabaseHrToolv1\MongoDatabaseHrToolv1.csproj" />
+    <ProjectReference Include="..\SqlDatabase\SqlDatabase.csproj" />
   
   </ItemGroup>
 
