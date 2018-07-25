@@ -3,11 +3,9 @@ using MigrateSqlDbToMongoDbApplication.Common.Services;
 using MigrateSqlDbToMongoDbApplication.Constants;
 using MongoDatabase.DbContext;
 using MongoDatabaseHrToolv1.DbContext;
-using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using CandidateDomainModel = MongoDatabase.Domain.Candidate.AggregatesModel;
 using InterviewDomainModel = MongoDatabase.Domain.Interview.AggregatesModel;
@@ -57,110 +55,120 @@ namespace MigrateSqlDbToMongoDbApplication.Services
         private async Task MigrateApplicationToCandidateService()
         {
             Console.WriteLine("Migrate [application] to [Candidate service] => Starting...");
-
-            var jobApplicationIdsDestination = _candidateDbContext.Applications.Select(s => s.Id).ToList();
-            var applicationSource = jobApplicationsData
-                .Where(w => !jobApplicationIdsDestination.Contains(w.Id.ToString())).ToList();
-            if (applicationSource != null && applicationSource.Count > 0)
+            try
             {
-                var pipeline = _candidateDbContext.Pipelines.FirstOrDefault(x => x.OrganizationalUnitId == organizationalUnitId);
-                if (pipeline == null)
+                var jobApplicationIdsDestination = _candidateDbContext.Applications.Select(s => s.Id).ToList();
+                var applicationSource = jobApplicationsData
+                    .Where(w => !jobApplicationIdsDestination.Contains(w.Id.ToString())).ToList();
+                if (applicationSource != null && applicationSource.Count > 0)
                 {
-                    Console.WriteLine($"Migrate [application] to [Candidate service] => FAIL: Pipeline is NULL . \n");
+                    var pipeline = _candidateDbContext.Pipelines.FirstOrDefault(x => x.OrganizationalUnitId == organizationalUnitId);
+                    if (pipeline == null)
+                    {
+                        Console.WriteLine($"Migrate [application] to [Candidate service] => FAIL: Pipeline is NULL . \n");
+                    }
+                    else
+                    {
+                        int count = 0;
+                        foreach (var application in applicationSource)
+                        {
+                            var candidate = GetCandidate(application.CandidateId);
+                            var job = (application.JobId is int) ? GetJob((int)application.JobId) : null;
+                            var isReject = (application.OverallStatus is int) ? IsReject((int)application.OverallStatus) : false;
+
+                            var currentPipelineStage = (application.OverallStatus is int) ?
+                                GetPipelineCandidateDomain(pipeline, (int)application.OverallStatus) :
+                                pipeline.Stages.FirstOrDefault(x => x.StageType == CandidateDomainModel.StageType.Sourced);
+
+                            var attachments = await GetAttachmentsCandidateDomain(new AttachmentInfo
+                            {
+                                ContainerFolder = cvAttachmentFolderName,
+                                NewApplicationId = application.Id,
+                                NewCandidateId = candidate.Id,
+                                OldApplicationId = application.ExternalId,
+                                OldStoragePath = oldHrtoolStoragePath
+                            });
+                            var data = new CandidateDomainModel.Application
+                            {
+                                AppliedDate = application.CreatedDate,
+                                CandidateId = candidate.Id.ToString(),
+                                IsSentEmail = application.IsSendMail is bool ?
+                                    (bool)application.IsSendMail : false,
+                                Id = application.Id.ToString(),
+                                OrganizationalUnitId = organizationalUnitId,
+                                JobId = job?.Id.ToString() ?? null,
+                                IsRejected = isReject,
+                                CurrentPipelineStage = new CandidateDomainModel.CurrentPipelineStage
+                                {
+                                    PipelineId = pipeline.Id,
+                                    PipelineStageId = currentPipelineStage.Id,
+                                    PipelineStageName = currentPipelineStage.Name
+                                },
+                                CV = new CandidateDomainModel.CV
+                                {
+                                    Education = GetEducationsCandidateDomain(candidate.ExternalId),
+                                    Projects = GetProjectsCandidateDomain(candidate.ExternalId),
+                                    Skills = GetSkillsCandidateDomain(candidate.ExternalId),
+                                    WorkExperiences = GetWorkExperiencesCandidateDomain(candidate.ExternalId)
+                                },
+                                Attachments = attachments
+                            };
+                            await _candidateDbContext.ApplicationCollection.InsertOneAsync(data);
+
+                            count++;
+                            Console.Write($"\r {count}/{applicationSource.Count}");
+
+                        }
+                        Console.WriteLine($"\n Migrate [application] to [Candidate service] => DONE: inserted {applicationSource.Count} applications. \n");
+                    }
                 }
                 else
                 {
-                    int count = 0;
-                    foreach (var application in applicationSource)
-                    {
-                        var candidate = GetCandidate(application.CandidateId);
-                        var job = (application.JobId is int) ? GetJob((int)application.JobId) : null;
-                        var isReject = (application.OverallStatus is int) ? IsReject((int)application.OverallStatus) : false;
-
-                        var currentPipelineStage = (application.OverallStatus is int) ?
-                            GetPipelineCandidateDomain(pipeline, (int)application.OverallStatus) :
-                            pipeline.Stages.FirstOrDefault(x => x.StageType == CandidateDomainModel.StageType.Sourced);
-
-                        var attachments = await GetAttachmentsCandidateDomain(new AttachmentInfo
-                        {
-                            ContainerFolder = cvAttachmentFolderName,
-                            NewApplicationId = application.Id,
-                            NewCandidateId = candidate.Id,
-                            OldApplicationId = application.ExternalId,
-                            OldStoragePath = oldHrtoolStoragePath
-                        });
-                        var data = new CandidateDomainModel.Application
-                        {
-                            AppliedDate = application.CreatedDate,
-                            CandidateId = candidate.Id.ToString(),
-                            IsSentEmail = application.IsSendMail is bool ?
-                                (bool)application.IsSendMail : false,
-                            Id = application.Id.ToString(),
-                            OrganizationalUnitId = organizationalUnitId,
-                            JobId = job?.Id.ToString() ?? null,
-                            IsRejected = isReject,
-                            CurrentPipelineStage = new CandidateDomainModel.CurrentPipelineStage
-                            {
-                                PipelineId = pipeline.Id,
-                                PipelineStageId = currentPipelineStage.Id,
-                                PipelineStageName = currentPipelineStage.Name
-                            },
-                            CV = new CandidateDomainModel.CV
-                            {
-                                Education = GetEducationsCandidateDomain(candidate.ExternalId),
-                                Projects = GetProjectsCandidateDomain(candidate.ExternalId),
-                                Skills = GetSkillsCandidateDomain(candidate.ExternalId),
-                                WorkExperiences = GetWorkExperiencesCandidateDomain(candidate.ExternalId)
-                            },
-                            Attachments = attachments
-                        };
-                        await _candidateDbContext.ApplicationCollection.InsertOneAsync(data);
-
-                        count++;
-                        Console.Write($"\r {count}/{applicationSource.Count}");
-
-                    }
-                    Console.WriteLine($"\n Migrate [application] to [Candidate service] => DONE: inserted {applicationSource.Count} applications. \n");
+                    Console.WriteLine($"Migrate [application] to [Candidate service] => DONE: data exsited. \n");
                 }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"Migrate [application] to [Candidate service] => DONE: data exsited. \n");
+                Console.WriteLine(ex);
             }
-
         }
 
         private async Task MigrateApplicationToInterviewService()
         {
-            Console.WriteLine("Migrate [application] to [Interview service] => Starting...");
-
-            var jobApplicationIdsDestination = _interviewDbContext.Applications.Select(s => s.Id).ToList();
-            var applicationSource = jobApplicationsData
-                .Where(w => !jobApplicationIdsDestination.Contains(w.Id.ToString())).ToList();
-            if (applicationSource != null && applicationSource.Count > 0)
+            try
             {
-                int count = 0;
-                foreach (var application in applicationSource)
+                Console.WriteLine("Migrate [application] to [Interview service] => Starting...");
+                var jobApplicationIdsDestination = _interviewDbContext.Applications.Select(s => s.Id).ToList();
+                var applicationSource = jobApplicationsData
+                    .Where(w => !jobApplicationIdsDestination.Contains(w.Id.ToString())).ToList();
+                if (applicationSource != null && applicationSource.Count > 0)
                 {
-                    var data = new InterviewDomainModel.Application
+                    int count = 0;
+                    foreach (var application in applicationSource)
                     {
-                        Id = application.Id.ToString()
+                        var data = new InterviewDomainModel.Application
+                        {
+                            Id = application.Id.ToString()
 
-                    };
+                        };
 
-                    await _interviewDbContext.ApplicationCollection.InsertOneAsync(data);
+                        await _interviewDbContext.ApplicationCollection.InsertOneAsync(data);
 
-                    count++;
-                    Console.Write($"\r {count}/{applicationSource.Count}");
+                        count++;
+                        Console.Write($"\r {count}/{applicationSource.Count}");
+                    }
+                    Console.WriteLine($"\n Migrate [application] to [Interview service] => DONE: inserted {applicationSource.Count} applications. \n");
+
                 }
-                Console.WriteLine($"\n Migrate [application] to [Interview service] => DONE: inserted {applicationSource.Count} applications. \n");
-
+                else
+                {
+                    Console.WriteLine($"Migrate [application] to [Interview service] => DONE: data exsited. \n");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"Migrate [application] to [Interview service] => DONE: data exsited. \n");
+                Console.WriteLine(ex);
             }
-
         }
 
 

@@ -85,7 +85,7 @@ namespace MigrateSqlDbToMongoDbApplication
                 await migrateOfferService.ExecuteAsync();
                 await migrateTemplateService.ExecuteAsync();
                 await migrateEmailService.ExecuteAsync();
-                Console.WriteLine("Migration Completed!!");
+                Console.WriteLine("\n MIGRATION COMPLETED !!");
             });
 
             Console.ReadKey();

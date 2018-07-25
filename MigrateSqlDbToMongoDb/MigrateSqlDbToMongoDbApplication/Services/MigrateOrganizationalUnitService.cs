@@ -62,130 +62,175 @@ namespace MigrateSqlDbToMongoDbApplication.Services
         private async Task MigrateOrganizationalUnitToCandidateService()
         {
             Console.WriteLine("Migrate [organizationalUnit] to [Candidate service] => Starting...");
-            var hasOrganizationalUnitExisted = _candidateDbContext.OrganizationalUnits.Any(a => a.Id == organizationalUnitId);
-            if (!hasOrganizationalUnitExisted)
+            try
             {
-                var organizationalUnit = new CandidateDomainModel.OrganizationalUnit
+                var hasOrganizationalUnitExisted = _candidateDbContext.OrganizationalUnits.Any(a => a.Id == organizationalUnitId);
+                if (!hasOrganizationalUnitExisted)
                 {
-                    Id = organizationalUnitId,
-                    Name = organizationalUnitName
-                };
-                await _candidateDbContext.OrganizationalUnitCollection.InsertOneAsync(organizationalUnit);
-                Console.WriteLine($"Migrate [organizationalUnit] to [Candidate service] => DONE: inserted {1} organizational unit. \n");
+                    var organizationalUnit = new CandidateDomainModel.OrganizationalUnit
+                    {
+                        Id = organizationalUnitId,
+                        Name = organizationalUnitName
+                    };
+                    await _candidateDbContext.OrganizationalUnitCollection.InsertOneAsync(organizationalUnit);
+                    Console.WriteLine($"Migrate [organizationalUnit] to [Candidate service] => DONE: inserted {1} organizational unit. \n");
+                }
+                else
+                {
+                    Console.WriteLine($"Migrate [organizationalUnit] to [Candidate service] => DONE: data existed. \n");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"Migrate [organizationalUnit] to [Candidate service] => DONE: data existed. \n");
+                Console.WriteLine(ex);
             }
         }
 
         private async Task MigrateOrganizationalUnitToInterviewService()
         {
-            Console.WriteLine("Migrate [organizationalUnit] to [Interview service] => Starting...");
-            var hasOrganizationalUnitExisted = _interviewDbContext.OrganizationalUnits.Any(a => a.Id == organizationalUnitId);
-            if (!hasOrganizationalUnitExisted)
+            try
             {
-                var organizationalUnit = new InterviewDomainModel.OrganizationalUnit
+                Console.WriteLine("Migrate [organizationalUnit] to [Interview service] => Starting...");
+                var hasOrganizationalUnitExisted = _interviewDbContext.OrganizationalUnits.Any(a => a.Id == organizationalUnitId);
+                if (!hasOrganizationalUnitExisted)
                 {
-                    Id = organizationalUnitId,
-                    Name = organizationalUnitName
-                };
-                await _interviewDbContext.OrganizationalUnitCollection.InsertOneAsync(organizationalUnit);
-                Console.WriteLine($"Migrate [organizationalUnit] to [Interview service] => DONE: inserted {1} organizational unit. \n");
+                    var organizationalUnit = new InterviewDomainModel.OrganizationalUnit
+                    {
+                        Id = organizationalUnitId,
+                        Name = organizationalUnitName
+                    };
+                    await _interviewDbContext.OrganizationalUnitCollection.InsertOneAsync(organizationalUnit);
+                    Console.WriteLine($"Migrate [organizationalUnit] to [Interview service] => DONE: inserted {1} organizational unit. \n");
+                }
+                else
+                {
+                    Console.WriteLine($"Migrate [organizationalUnit] to [Interview service] => DONE: data existed. \n");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"Migrate [organizationalUnit] to [Interview service] => DONE: data existed. \n");
+                Console.WriteLine(ex);
             }
         }
 
         private async Task MigrateOrganizationalUnitToJobService()
         {
-            Console.WriteLine("Migrate [organizationalUnit] to [Job service] => Starting...");
-            var hasOrganizationalUnitExisted = _jobDbContext.OrganizationalUnits.Any(a => a.Id == organizationalUnitId);
-            if (!hasOrganizationalUnitExisted)
+            try
             {
-                var organizationalUnit = new JobDomainModel.OrganizationalUnit
+                Console.WriteLine("Migrate [organizationalUnit] to [Job service] => Starting...");
+                var hasOrganizationalUnitExisted = _jobDbContext.OrganizationalUnits.Any(a => a.Id == organizationalUnitId);
+                if (!hasOrganizationalUnitExisted)
                 {
-                    Id = organizationalUnitId,
-                    Name = organizationalUnitName
-                };
-                await _jobDbContext.OrganizationalUnitCollection.InsertOneAsync(organizationalUnit);
-                Console.WriteLine($"Migrate [organizationalUnit] to [Job service] => DONE: inserted {1} organizational unit. \n");
+                    var organizationalUnit = new JobDomainModel.OrganizationalUnit
+                    {
+                        Id = organizationalUnitId,
+                        Name = organizationalUnitName
+                    };
+                    await _jobDbContext.OrganizationalUnitCollection.InsertOneAsync(organizationalUnit);
+                    Console.WriteLine($"Migrate [organizationalUnit] to [Job service] => DONE: inserted {1} organizational unit. \n");
+                }
+                else
+                {
+                    Console.WriteLine($"Migrate [organizationalUnit] to [Job service] => DONE: data existed. \n");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"Migrate [organizationalUnit] to [Job service] => DONE: data existed. \n");
+                Console.WriteLine(ex);
             }
         }
 
         private async Task MigrateOrganizationalUnitToJobMatchingService()
         {
-            Console.WriteLine("Migrate [organizationalUnit] to [Job Matching service] => Starting...");
-            var hasOrganizationalUnitExisted = _jobMatchingDbContext.OrganizationalUnits.Any(a => a.Id == organizationalUnitId);
-            if (!hasOrganizationalUnitExisted)
+            try
             {
-                var organizationalUnit = new JobMatchingDomainModel.OrganizationalUnit
+                Console.WriteLine("Migrate [organizationalUnit] to [Job Matching service] => Starting...");
+                var hasOrganizationalUnitExisted = _jobMatchingDbContext.OrganizationalUnits.Any(a => a.Id == organizationalUnitId);
+                if (!hasOrganizationalUnitExisted)
                 {
-                    Id = organizationalUnitId,
-                    Name = organizationalUnitName
-                };
-                await _jobMatchingDbContext.OrganizationalUnitCollection.InsertOneAsync(organizationalUnit);
-                Console.WriteLine($"Migrate [organizationalUnit] to [Job Matching service] => DONE: inserted {1} organizational unit. \n");
+                    var organizationalUnit = new JobMatchingDomainModel.OrganizationalUnit
+                    {
+                        Id = organizationalUnitId,
+                        Name = organizationalUnitName
+                    };
+                    await _jobMatchingDbContext.OrganizationalUnitCollection.InsertOneAsync(organizationalUnit);
+                    Console.WriteLine($"Migrate [organizationalUnit] to [Job Matching service] => DONE: inserted {1} organizational unit. \n");
+                }
+                else
+                {
+                    Console.WriteLine($"Migrate [organizationalUnit] to [Job Matching service] => DONE: data existed. \n");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"Migrate [organizationalUnit] to [Job Matching service] => DONE: data existed. \n");
+                Console.WriteLine(ex);
             }
         }
 
         private async Task MigrateOrganizationalUnitToOfferService()
         {
-            Console.WriteLine("Migrate [organizationalUnit] to [Offer service] => Starting...");
-            var hasOrganizationalUnitExisted = _offerDbContext.OrganizationalUnits.Any(a => a.Id == organizationalUnitId);
-            if (!hasOrganizationalUnitExisted)
+            try
             {
-                var organizationalUnit = new OfferDomainModel.OrganizationalUnit
+                Console.WriteLine("Migrate [organizationalUnit] to [Offer service] => Starting...");
+                var hasOrganizationalUnitExisted = _offerDbContext.OrganizationalUnits.Any(a => a.Id == organizationalUnitId);
+                if (!hasOrganizationalUnitExisted)
                 {
-                    Id = organizationalUnitId,
-                    Name = organizationalUnitName
-                };
-                await _offerDbContext.OrganizationalUnitCollection.InsertOneAsync(organizationalUnit);
-                Console.WriteLine($"Migrate [organizationalUnit] to [Offer service] => DONE: inserted {1} organizational unit. \n");
+                    var organizationalUnit = new OfferDomainModel.OrganizationalUnit
+                    {
+                        Id = organizationalUnitId,
+                        Name = organizationalUnitName
+                    };
+                    await _offerDbContext.OrganizationalUnitCollection.InsertOneAsync(organizationalUnit);
+                    Console.WriteLine($"Migrate [organizationalUnit] to [Offer service] => DONE: inserted {1} organizational unit. \n");
+                }
+                else
+                {
+                    Console.WriteLine($"Migrate [organizationalUnit] to [Offer service] => DONE: data existed. \n");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"Migrate [organizationalUnit] to [Offer service] => DONE: data existed. \n");
+                Console.WriteLine(ex);
             }
+
         }
 
         private async Task MigrateOrganizationalUnitToTemplateService()
         {
-            Console.WriteLine("Migrate [organizationalUnit] to [Template service] => Starting...");
-            var hasOrganizationalUnitExisted = _templateDbContext.OrganizationalUnits.Any(a => a.Id == organizationalUnitId);
-            if (!hasOrganizationalUnitExisted)
+            try
             {
-                var organizationalUnit = new TemplateDomainModel.OrganizationalUnit
+                Console.WriteLine("Migrate [organizationalUnit] to [Template service] => Starting...");
+                var hasOrganizationalUnitExisted = _templateDbContext.OrganizationalUnits.Any(a => a.Id == organizationalUnitId);
+                if (!hasOrganizationalUnitExisted)
                 {
-                    Id = organizationalUnitId,
-                    Name = organizationalUnitName
-                };
-                await _templateDbContext.OrganizationalUnitCollection.InsertOneAsync(organizationalUnit);
-                Console.WriteLine($"Migrate [organizationalUnit] to [Template service] => DONE: inserted {1} organizational unit. \n");
+                    var organizationalUnit = new TemplateDomainModel.OrganizationalUnit
+                    {
+                        Id = organizationalUnitId,
+                        Name = organizationalUnitName
+                    };
+                    await _templateDbContext.OrganizationalUnitCollection.InsertOneAsync(organizationalUnit);
+                    Console.WriteLine($"Migrate [organizationalUnit] to [Template service] => DONE: inserted {1} organizational unit. \n");
+                }
+                else
+                {
+                    Console.WriteLine($"Migrate [organizationalUnit] to [Template service] => DONE: data existed. \n");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"Migrate [organizationalUnit] to [Template service] => DONE: data existed. \n");
+                Console.WriteLine(ex);
             }
         }
 
         private async Task MigratePipelineStageToCandidateService()
         {
-            Console.WriteLine("Migrate [pipeline] to [Candidate service] => Starting...");
-            var pipeline = _candidateDbContext.Pipelines.FirstOrDefault(x => x.OrganizationalUnitId == organizationalUnitId);
-            if (pipeline == null)
+            try
             {
-                var newPipelineStages = new List<CandidateDomainModel.PipelineStage>
+                Console.WriteLine("Migrate [pipeline] to [Candidate service] => Starting...");
+                var pipeline = _candidateDbContext.Pipelines.FirstOrDefault(x => x.OrganizationalUnitId == organizationalUnitId);
+                if (pipeline == null)
+                {
+                    var newPipelineStages = new List<CandidateDomainModel.PipelineStage>
                 {
                         new CandidateDomainModel.PipelineStage {
                             StageType = CandidateDomainModel.StageType.Sourced,
@@ -233,20 +278,26 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                         }
                     };
 
-                var newPipeline = new CandidateDomainModel.Pipeline
-                {
-                    Id = ObjectId.GenerateNewId().ToString(),
-                    OrganizationalUnitId = organizationalUnitId,
-                    Stages = newPipelineStages
-                };
+                    var newPipeline = new CandidateDomainModel.Pipeline
+                    {
+                        Id = ObjectId.GenerateNewId().ToString(),
+                        OrganizationalUnitId = organizationalUnitId,
+                        Stages = newPipelineStages
+                    };
 
-                await _candidateDbContext.PipelineCollection.InsertOneAsync(newPipeline);
-                Console.WriteLine($"Migrate [pipeline] to [Candidate service] => DONE: inserted {1} pipeline. \n");
+                    await _candidateDbContext.PipelineCollection.InsertOneAsync(newPipeline);
+                    Console.WriteLine($"Migrate [pipeline] to [Candidate service] => DONE: inserted {1} pipeline. \n");
+                }
+                else
+                {
+                    Console.WriteLine("Migrate [pipeline] to [Candidate service] => DONE: data existed. \n");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine("Migrate [pipeline] to [Candidate service] => DONE: data existed. \n");
+                Console.WriteLine(ex);
             }
+
         }
     }
 }

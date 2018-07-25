@@ -26,6 +26,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
         private ScheduleDbContext _scheduleDbContext;
 
         private string organizationalUnitId;
+        private string userId;
         private string profileImageContainerName;
         private string oldHrtoolStoragePath;
         private List<MongoDatabaseHrToolv1.Model.Candidate> candidateData;
@@ -48,6 +49,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
             _scheduleDbContext = scheduleDbContext;
 
             organizationalUnitId = _configuration.GetSection("CompanySetting:Id")?.Value;
+            userId = configuration.GetSection("AdminUser:Id")?.Value;
             var azuareStorageConnectionString = _configuration.GetSection("AzureStorage:StorageConnectionString")?.Value;
             uploadFileFromLink = new UploadFileFromLink(azuareStorageConnectionString);
             profileImageContainerName = _configuration.GetSection("AzureStorage:ProfileImageContainerName")?.Value;
@@ -68,52 +70,59 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 
         private async Task MigrateCandidateToCandidateService()
         {
-            Console.WriteLine("Migrate [candidate] to [Candidate service] => Starting...");
-
-            var candidateIdsDestination = _candidateDbContext.Candidates.Select(s => s.Id).ToList();
-            var candidatesSource = candidateData
-                .Where(w => !candidateIdsDestination.Contains(w.Id.ToString()))
-                .ToList();
-
-            if (candidatesSource != null && candidatesSource.Count > 0)
+            try
             {
-                int count = 0;
-                foreach (var source in candidatesSource)
-                {
-                    var applicationIds = applicationsData
-                    .Where(x => x.ExternalId == source.ExternalId)
-                    .Select(x => x.Id.ToString())
+                Console.WriteLine("Migrate [candidate] to [Candidate service] => Starting...");
+                var candidateIdsDestination = _candidateDbContext.Candidates.Select(s => s.Id).ToList();
+                var candidatesSource = candidateData
+                    .Where(w => !candidateIdsDestination.Contains(w.Id.ToString()))
                     .ToList();
-                    var data = new CandidateDomainModel.Candidate()
-                    {
-                        Id = source.Id.ToString(),
-                        Firstname = source.FirstName,
-                        Lastname = source.LastName,
-                        OrganizationalUnitId = organizationalUnitId,
-                        PhoneNumber = source.Phone,
-                        Email = source.Email,
-                        Gender = (CandidateDomainModel.Gender?)ConvertGender(source.Gender),
-                        DateOfBirth = !string.IsNullOrEmpty(source.BirthDay.ToString()) ?
-                                        Convert.ToDateTime(source.BirthDay) : new DateTime?(),
-                        Address = new CandidateDomainModel.Address { City = source.City, StreetAddress = source.Address },
-                        CreatedDate = !string.IsNullOrEmpty(source.CreateDate.ToString()) ? (DateTime)source.CreateDate : DateTime.Now,
-                        ApplicationIds = applicationIds,
-                        ProfileImagePath = await UploadProfileImage(source.ImagePath,
-                                                      source.Id.ToString(),
-                                                      organizationalUnitId,
-                                                      profileImageContainerName)
-                    };
-                    await _candidateDbContext.CandidateCollection.InsertOneAsync(data);
 
-                    count++;
-                    Console.Write($"\r {count}/{candidatesSource.Count}");
+                if (candidatesSource != null && candidatesSource.Count > 0)
+                {
+                    int count = 0;
+                    foreach (var source in candidatesSource)
+                    {
+                        var applicationIds = applicationsData
+                        .Where(x => x.ExternalId == source.ExternalId)
+                        .Select(x => x.Id.ToString())
+                        .ToList();
+                        var data = new CandidateDomainModel.Candidate()
+                        {
+                            Id = source.Id.ToString(),
+                            Firstname = source.FirstName,
+                            Lastname = source.LastName,
+                            OrganizationalUnitId = organizationalUnitId,
+                            PhoneNumber = source.Phone,
+                            Email = source.Email,
+                            Gender = (CandidateDomainModel.Gender?)ConvertGender(source.Gender),
+                            DateOfBirth = !string.IsNullOrEmpty(source.BirthDay.ToString()) ?
+                                            Convert.ToDateTime(source.BirthDay) : new DateTime?(),
+                            Address = new CandidateDomainModel.Address { City = source.City, StreetAddress = source.Address },
+                            CreatedDate = !string.IsNullOrEmpty(source.CreateDate.ToString()) ? (DateTime)source.CreateDate : new DateTime().AddDays(-7),
+                            ReadByUserIds = new List<string> { userId },
+                            ApplicationIds = applicationIds,
+                            ProfileImagePath = await UploadProfileImage(source.ImagePath,
+                                                          source.Id.ToString(),
+                                                          organizationalUnitId,
+                                                          profileImageContainerName)
+                        };
+                        await _candidateDbContext.CandidateCollection.InsertOneAsync(data);
+
+                        count++;
+                        Console.Write($"\r {count}/{candidatesSource.Count}");
+                    }
+                    Console.WriteLine($"\n Migrate [candidate] to [Candidate service] => DONE: inserted {candidatesSource.Count} candidates. \n");
                 }
-                Console.WriteLine($"\n Migrate [candidate] to [Candidate service] => DONE: inserted {candidatesSource.Count} candidates. \n");
+                else
+                {
+                    Console.WriteLine($"Migrate [candidate] to [Candidate service] => DONE: data exsited. \n");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"Migrate [candidate] to [Candidate service] => DONE: data exsited. \n");
-            }
+                Console.WriteLine(ex);
+            }            
         }
 
         private async Task MigrateCandidateToInterviewService()
