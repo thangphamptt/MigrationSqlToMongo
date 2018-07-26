@@ -99,7 +99,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                             DateOfBirth = !string.IsNullOrEmpty(source.BirthDay.ToString()) ?
                                             Convert.ToDateTime(source.BirthDay) : new DateTime?(),
                             Address = new CandidateDomainModel.Address { City = source.City, StreetAddress = source.Address },
-                            CreatedDate = !string.IsNullOrEmpty(source.CreateDate.ToString()) ? (DateTime)source.CreateDate : new DateTime().AddDays(-7),
+                            CreatedDate = !string.IsNullOrEmpty(source.CreateDate.ToString()) ? (DateTime)source.CreateDate : new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-7),
                             ReadByUserIds = new List<string> { userId },
                             ApplicationIds = applicationIds,
                             ProfileImagePath = await UploadProfileImage(source.ImagePath,
