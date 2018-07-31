@@ -84,7 +84,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                     foreach (var source in candidatesSource)
                     {
                         var applicationIds = applicationsData
-                        .Where(x => x.ExternalId == source.ExternalId)
+                        .Where(x => x.CandidateId == source.ExternalId)
                         .Select(x => x.Id.ToString())
                         .ToList();
                         var data = new CandidateDomainModel.Candidate()
@@ -139,7 +139,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                 foreach (var source in candidatesSource)
                 {
                     var applicationIds = applicationsData
-                      .Where(x => x.ExternalId == source.ExternalId)
+                      .Where(x => x.CandidateId == source.ExternalId)
                       .Select(x => x.Id.ToString())
                       .ToList();
                     var data = new InterviewDomainModel.Candidate()

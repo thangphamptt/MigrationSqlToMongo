@@ -62,7 +62,8 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                     .Where(w => !jobApplicationIdsDestination.Contains(w.Id.ToString())).ToList();
                 if (applicationSource != null && applicationSource.Count > 0)
                 {
-                    var pipeline = _candidateDbContext.Pipelines.FirstOrDefault(x => x.OrganizationalUnitId == organizationalUnitId);
+                    var pipeline = _candidateDbContext.Pipelines
+                        .FirstOrDefault(x => x.OrganizationalUnitId == organizationalUnitId);
                     if (pipeline == null)
                     {
                         Console.WriteLine($"Migrate [application] to [Candidate service] => FAIL: Pipeline is NULL . \n");
