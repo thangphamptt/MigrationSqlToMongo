@@ -33,7 +33,7 @@ namespace MongoDatabase.Repositories.Offer
                                                   .Set(x => x.Salary, offer.Salary)
                                                   .Set(x => x.CurrencyId, offer.CurrencyId)
                                                   .Set(x => x.StartDate, offer.StartDate)
-                                                  .Set(x => x.IsUpdate, offer.IsUpdate)
+                                                  .Set(x => x.IsUpdated, offer.IsUpdated)
                                                   .Set(x => x.ModifiedDate, offer.ModifiedDate)
                                                   .Set(x => x.ModifiedByUserId, offer.ModifiedByUserId)
                                                   .Set(x => x.ExpirationDate, offer.ExpirationDate);
@@ -45,7 +45,7 @@ namespace MongoDatabase.Repositories.Offer
         {
             var result = Builders<Domain.Offer.AggregatesModel.Offer>.Filter.Where(x => x.Id == offer.Id);
             var data = Builders<Domain.Offer.AggregatesModel.Offer>.Update.Set(x => x.Status, null)
-                                                  .Set(x => x.IsUpdate, false)
+                                                  .Set(x => x.IsUpdated, false)
                                                   .Set(x => x.SentDate, offer.SentDate)
                                                   .Set(x => x.SentByUserId, offer.SentByUserId);
             await _dbContext.OfferCollection.UpdateOneAsync(result, data);
@@ -57,7 +57,7 @@ namespace MongoDatabase.Repositories.Offer
             var data = Builders<Domain.Offer.AggregatesModel.Offer>.Update.Set(x => x.Status, offer.Status)
                                                   .Set(x => x.ModifiedByUserId, offer.ModifiedByUserId)
                                                   .Set(x => x.OrganizationalUnitId, offer.OrganizationalUnitId)
-                                                  .Set(x => x.IsUpdate, offer.IsUpdate)
+                                                  .Set(x => x.IsUpdated, offer.IsUpdated)
                                                   .Set(x => x.ModifiedDate, offer.ModifiedDate)
                                                   .Set(x => x.ModifiedByUserId, offer.ModifiedByUserId);
 

@@ -15,7 +15,7 @@ namespace MongoDatabase.Domain.Offer.AggregatesModel
         public string Position { get; set; }
         public decimal Salary { get; set; }
         public string CurrencyId { get; set; }
-        public bool IsUpdate { get; set; }
+        public bool IsUpdated { get; set; }
         public DateTime? SentDate { get; set; }
         public string SentByUserId { get; set; }
         public DateTime StartDate { get; set; }

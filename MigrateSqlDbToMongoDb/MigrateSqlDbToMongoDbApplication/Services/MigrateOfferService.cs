@@ -78,7 +78,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                         SentDate = offer.SendingDate is DateTime ? (DateTime)offer.SendingDate : new DateTime?(),
                         StartDate = expirationDate.AddMonths(-1),
                         SentByUserId = offer.SendingDate is DateTime ? userId : string.Empty,
-                        IsUpdate = false
+                        IsUpdated = false
                     };
 
                     await _offerDbContext.OfferCollection.InsertOneAsync(data);
