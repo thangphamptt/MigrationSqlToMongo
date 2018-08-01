@@ -87,7 +87,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                         PositionLevel = JobDomainModel.PositionLevel.Experienced,
                         Status = Helper.JobStatusToJobService(jobStatus, job.ExternalId),
                         CreatedByUserId = userId,
-                        CategoryIds = new List<string> { category?.Id }
+                        CategoryIds = category != null ? new List<string> { category?.Id } : new List<string>()
                     };
 
                     await _jobDbContext.JobCollection.InsertOneAsync(data);
@@ -129,7 +129,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                         Description = template?.JobDescription,
                         PositionLevel = string.Empty,
                         Status = Helper.JobStatusToCandidateService(jobStatus, job.ExternalId),
-                        JobCategoryIds = new List<string> { category?.Id }
+                        JobCategoryIds = category != null ? new List<string> { category?.Id } : new List<string>()
                     };
 
                     await _candidateDbContext.JobCollection.InsertOneAsync(data);
