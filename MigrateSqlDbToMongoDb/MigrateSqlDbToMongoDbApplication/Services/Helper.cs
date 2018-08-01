@@ -1,10 +1,9 @@
-﻿using MongoDatabaseHrToolv1.DbContext;
-using System.Linq;
-using HrToolDomainModel = MongoDatabaseHrToolv1.Model;
+﻿using HrToolDomainModel = MongoDatabaseHrToolv1.Model;
 using JobDomainModel = MongoDatabase.Domain.Job.AggregatesModel;
 using CandidateDomainModel = MongoDatabase.Domain.Candidate.AggregatesModel;
 using InterviewDomainModel = MongoDatabase.Domain.Interview.AggregatesModel;
 using OfferDomainModel = MongoDatabase.Domain.Offer.AggregatesModel;
+using JobMatchingDomainModel = MongoDatabase.Domain.JobMatching.AggregatesModel;
 using System.Text;
 using System.Security.Cryptography;
 using System;
@@ -79,6 +78,23 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                 }
             }
             return OfferDomainModel.JobStatus.Closed;
+        }
+
+        public static JobMatchingDomainModel.JobStatus JobStatusToJobMatchingService(HrToolDomainModel.JobStatus jobStatus, int jobExternalId)
+        {
+            if (jobStatus != null)
+            {
+                switch (jobStatus.Status)
+                {
+                    case "0":
+                        return JobMatchingDomainModel.JobStatus.Draft;
+                    case "3":
+                        return JobMatchingDomainModel.JobStatus.Published;
+                    case "4":
+                        return JobMatchingDomainModel.JobStatus.Closed;
+                }
+            }
+            return JobMatchingDomainModel.JobStatus.Closed;
         }
 
         public static string Decrypt(string toDecrypt, bool useHashing)

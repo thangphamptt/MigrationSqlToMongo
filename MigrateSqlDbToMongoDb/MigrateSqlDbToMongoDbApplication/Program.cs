@@ -62,7 +62,8 @@ namespace MigrateSqlDbToMongoDbApplication
 
             var migrateJobService = new MigrateJobService(configuration, hrtoolDbContext,
                 jobDbContext, candidateDbContext,
-                interviewDbContext, offerDbContext);
+                interviewDbContext, offerDbContext, 
+                jobMatchingDbContext);
 
             var migrateOfferService = new MigrateOfferService(configuration, hrtoolDbContext, offerDbContext);
 
