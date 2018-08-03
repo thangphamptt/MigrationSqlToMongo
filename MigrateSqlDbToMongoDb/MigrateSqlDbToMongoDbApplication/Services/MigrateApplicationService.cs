@@ -57,8 +57,19 @@ namespace MigrateSqlDbToMongoDbApplication.Services
             Console.WriteLine("Migrate [application] to [Candidate service] => Starting...");
             try
             {
+                var applicationsJobNotNullOrEmpty = jobApplicationsData.Where(w => !string.IsNullOrEmpty(w.JobId?.ToString())).ToList();
+                var applicationsJobNullOrEmpty = jobApplicationsData.Where(w => string.IsNullOrEmpty(w.JobId?.ToString())).ToList();
+                if (applicationsJobNullOrEmpty != null)
+                {
+                    var applications = applicationsJobNullOrEmpty?.Distinct(new ApplicationCandidateComparer()).ToList();
+                    if (applications != null)
+                    {
+                        applicationsJobNotNullOrEmpty?.AddRange(applications);
+                    }
+                }
+
                 var jobApplicationIdsDestination = _candidateDbContext.Applications.Select(s => s.Id).ToList();
-                var applicationSource = jobApplicationsData
+                var applicationSource = applicationsJobNotNullOrEmpty
                     .Where(w => !jobApplicationIdsDestination.Contains(w.Id.ToString())).ToList();
                 if (applicationSource != null && applicationSource.Count > 0)
                 {
@@ -71,19 +82,6 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                     else
                     {
                         int count = 0;
-                        var applicationsJobNotNullOrEmpty = applicationSource.Where(w => !string.IsNullOrEmpty(w.JobId?.ToString())).ToList();
-                        var applicationsJobNullOrEmpty = applicationSource.Where(w => string.IsNullOrEmpty(w.JobId?.ToString())).ToList();
-                        if (applicationsJobNullOrEmpty != null)
-                        {
-                            var applications = applicationsJobNullOrEmpty.Distinct(new ApplicationCandidateComparer()).ToList();
-                            if (applications != null)
-                            {
-                                applicationsJobNotNullOrEmpty?.AddRange(applications);
-                            }
-                        }
-
-                        applicationSource = applicationsJobNotNullOrEmpty;
-
                         foreach (var application in applicationSource)
                         {
                             var candidate = GetCandidate(application.CandidateId);
