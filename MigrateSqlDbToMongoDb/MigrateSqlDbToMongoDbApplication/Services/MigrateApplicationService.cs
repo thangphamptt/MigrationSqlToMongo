@@ -71,6 +71,19 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                     else
                     {
                         int count = 0;
+                        var applicationsJobNotNullOrEmpty = applicationSource.Where(w => !string.IsNullOrEmpty(w.JobId?.ToString())).ToList();
+                        var applicationsJobNullOrEmpty = applicationSource.Where(w => string.IsNullOrEmpty(w.JobId?.ToString())).ToList();
+                        if (applicationsJobNullOrEmpty != null)
+                        {
+                            var applications = applicationsJobNullOrEmpty.Distinct(new ApplicationCandidateComparer()).ToList();
+                            if (applications != null)
+                            {
+                                applicationsJobNotNullOrEmpty?.AddRange(applications);
+                            }
+                        }
+
+                        applicationSource = applicationsJobNotNullOrEmpty;
+
                         foreach (var application in applicationSource)
                         {
                             var candidate = GetCandidate(application.CandidateId);
@@ -408,6 +421,19 @@ namespace MigrateSqlDbToMongoDbApplication.Services
             public MongoDB.Bson.ObjectId NewApplicationId { get; set; }
             public string ContainerFolder { get; set; }
             public string OldStoragePath { get; set; }
+        }
+
+        public class ApplicationCandidateComparer : IEqualityComparer<MongoDatabaseHrToolv1.Model.JobApplication>
+        {
+            public bool Equals(MongoDatabaseHrToolv1.Model.JobApplication obj1, MongoDatabaseHrToolv1.Model.JobApplication obj2)
+            {
+                return obj1.CandidateId == obj2.CandidateId;
+            }
+
+            public int GetHashCode(MongoDatabaseHrToolv1.Model.JobApplication obj)
+            {
+                return obj.CandidateId.GetHashCode();
+            }
         }
     }
 }

@@ -84,9 +84,20 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                     foreach (var source in candidatesSource)
                     {
                         var applicationIds = applicationsData
-                        .Where(x => x.CandidateId == source.ExternalId)
+                        .Where(x => x.CandidateId == source.ExternalId && !string.IsNullOrEmpty(x.JobId?.ToString()))
                         .Select(x => x.Id.ToString())
                         .ToList();
+
+                        var applicationIdJobIdEmpty = applicationsData
+                         .Where(x => x.CandidateId == source.ExternalId && string.IsNullOrEmpty(x.JobId?.ToString()))
+                         .OrderByDescending(o => o.ExternalId)
+                         .FirstOrDefault()?.Id.ToString();
+
+                        if (applicationIdJobIdEmpty != null)
+                        {
+                            applicationIds.Add(applicationIdJobIdEmpty);
+                        }
+
                         var data = new CandidateDomainModel.Candidate()
                         {
                             Id = source.Id.ToString(),
@@ -122,7 +133,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-            }            
+            }
         }
 
         private async Task MigrateCandidateToInterviewService()
@@ -138,10 +149,6 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                 int count = 0;
                 foreach (var source in candidatesSource)
                 {
-                    var applicationIds = applicationsData
-                      .Where(x => x.CandidateId == source.ExternalId)
-                      .Select(x => x.Id.ToString())
-                      .ToList();
                     var data = new InterviewDomainModel.Candidate()
                     {
                         Id = source.Id.ToString(),
@@ -175,10 +182,6 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                 int count = 0;
                 foreach (var source in candidatesSource)
                 {
-                    var applicationIds = applicationsData
-                        .Where(x => x.CandidateId == source.ExternalId)
-                        .Select(x => x.Id.ToString())
-                        .ToList();
                     var data = new JobMatchingDomainModel.Candidate()
                     {
                         Id = source.Id.ToString(),
@@ -212,10 +215,6 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                 int count = 0;
                 foreach (var source in candidatesSource)
                 {
-                    var applicationIds = applicationsData
-                        .Where(x => x.CandidateId == source.ExternalId)
-                        .Select(x => x.Id.ToString())
-                        .ToList();
                     var data = new OfferDomainModel.Candidate()
                     {
                         Id = source.Id.ToString(),
@@ -249,10 +248,6 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                 int count = 0;
                 foreach (var source in candidatesSource)
                 {
-                    var applicationIds = applicationsData
-                        .Where(x => x.CandidateId == source.ExternalId)
-                        .Select(x => x.Id.ToString())
-                        .ToList();
                     var data = new ScheduleDomainModel.Candidate()
                     {
                         Id = source.Id.ToString(),
