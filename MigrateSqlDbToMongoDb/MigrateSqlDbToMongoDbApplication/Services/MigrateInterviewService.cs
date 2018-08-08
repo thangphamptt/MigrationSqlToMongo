@@ -72,6 +72,7 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                         CreatedDate = DateTime.Now,
                         Schedules = interviewSchedules?.Select(x => new InterviewDomainModel.Schedule
                         {
+							Id = x.Id.ToString(),
                             TimeFrom = !string.IsNullOrEmpty(x.FromBookRoomDate.ToString()) ? DateTime.Parse(x.FromBookRoomDate.ToString(), CultureInfo.InvariantCulture) : DateTime.Now,
                             Duration = !string.IsNullOrEmpty(x.FromBookRoomTime.ToString()) && !string.IsNullOrEmpty(x.FromBookRoomTime.ToString())
                                 ? (int)(DateTime.Parse(x.ToBookRoomTime.ToString(), CultureInfo.InvariantCulture) - DateTime.Parse(x.FromBookRoomTime.ToString(), CultureInfo.InvariantCulture)).TotalMinutes : 0,

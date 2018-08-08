@@ -4,6 +4,7 @@ namespace MongoDatabase.Domain.Interview.AggregatesModel
 {
 	public class Schedule
     {
+		public string Id { get; set; }
         public DateTime TimeFrom { get; set; }
         public int Duration { get; set; }
         public string AssessmentType{ get; set; }
