@@ -124,8 +124,9 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                     var organizationalUnit = new JobDomainModel.OrganizationalUnit
                     {
                         Id = organizationalUnitId,
-                        Name = organizationalUnitName
-                    };
+                        Name = organizationalUnitName,
+						Password = "Aa@123456"
+					};
                     await _jobDbContext.OrganizationalUnitCollection.InsertOneAsync(organizationalUnit);
                     Console.WriteLine($"Migrate [organizationalUnit] to [Job service] => DONE: inserted {1} organizational unit. \n");
                 }

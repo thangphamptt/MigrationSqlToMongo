@@ -78,7 +78,9 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                                 ? (int)(DateTime.Parse(x.ToBookRoomTime.ToString(), CultureInfo.InvariantCulture) - DateTime.Parse(x.FromBookRoomTime.ToString(), CultureInfo.InvariantCulture)).TotalMinutes : 0,
                             AssessmentType = GetAssessmentType(interview),
                             Location = GetLocation(x.RoomId),
-                            Interviewer = email
+                            Interviewer = email,
+							Comment = string.Empty,
+							Result = 0
                         }).ToList()
                     };
                     await _interviewDbContext.InterviewCollection.InsertOneAsync(data);

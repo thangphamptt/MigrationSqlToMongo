@@ -30,7 +30,7 @@ namespace MongoDatabase.Domain.Schedule.AggregatesModel
 
         public string Status { get; set; }
 
-        public IList<User> Attendees { get; set; }
+        public IList<User> Attendees  { get; set; }
 
         public string CandidateId { get; set; }
 
@@ -39,5 +39,7 @@ namespace MongoDatabase.Domain.Schedule.AggregatesModel
         public string Interviewer { get; set; }
 
         public string InterviewType { get; set; }
-    }
+
+		public string OrganizationalUnitId { get; set; }
+	}
 }

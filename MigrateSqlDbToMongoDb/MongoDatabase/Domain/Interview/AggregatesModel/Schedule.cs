@@ -10,5 +10,7 @@ namespace MongoDatabase.Domain.Interview.AggregatesModel
         public string AssessmentType{ get; set; }
         public string Interviewer { get; set; }
         public string Location { get; set; }
-    }
+		public int Result { get; set; }
+		public string Comment { get; set; }
+	}
 }

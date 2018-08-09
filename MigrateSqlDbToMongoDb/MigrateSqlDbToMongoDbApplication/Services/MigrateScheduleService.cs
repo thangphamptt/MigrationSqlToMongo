@@ -93,9 +93,10 @@ namespace MigrateSqlDbToMongoDbApplication.Services
                         Duration = CalculateDuration(fromDate, toDate),
                         End = toDate,
                         Location = GetLocation(interviewSchedule.RoomId),
-                        OrganizerId = organizationalUnitId,
+                        OrganizerId = user.Id,
                         ScheduleId = interview.Id.ToString(),
-                        Start = fromDate
+                        Start = fromDate,
+						OrganizationalUnitId = organizationalUnitId
                     };
 
                     await _scheduleDbContext.AppointmentCollection.InsertOneAsync(data);
