@@ -26,5 +26,6 @@ namespace MongoDatabase.Domain.Job.AggregatesModel
         public IList<string> OwnedByUserIds { get; set; } = new List<string>();
         public IList<string> ReadByUserIds { get; set; } = new List<string>();
         public IList<Publication> Publications { get; set; } = new List<Publication>();
+        public IList<string> PublishingPortalIds { get; set; } = new List<string>();
     }
 }
