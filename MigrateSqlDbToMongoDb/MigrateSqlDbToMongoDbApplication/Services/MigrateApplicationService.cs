@@ -70,7 +70,10 @@ namespace MigrateSqlDbToMongoDbApplication.Services
 
                 var jobApplicationIdsDestination = _candidateDbContext.Applications.Select(s => s.Id).ToList();
                 var applicationSource = applicationsJobNotNullOrEmpty
-                    .Where(w => !jobApplicationIdsDestination.Contains(w.Id.ToString())).ToList();
+                    .Where(w => !jobApplicationIdsDestination.Contains(w.Id.ToString()))
+                    .GroupBy(g => new { g.CandidateId, g.JobId })
+                    .Select(s => s.FirstOrDefault())
+                    .ToList();
                 if (applicationSource != null && applicationSource.Count > 0)
                 {
                     var pipeline = _candidateDbContext.Pipelines
