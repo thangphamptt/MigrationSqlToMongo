@@ -29,10 +29,16 @@ namespace MigrateSqlDbToMongoDbApplication.Common.Services
                     try
                     {
                         var attachmentUrl = new Uri(attachment.Path);
-                        HttpResponseMessage result = client.GetAsync(attachmentUrl).Result;
+                        HttpResponseMessage result = await client.GetAsync(attachmentUrl);
                         if (result.IsSuccessStatusCode)
                         {
                             var contentData = await result.Content.ReadAsByteArrayAsync();
+
+                            if (contentData == null)
+                            {
+                                return string.Empty;
+                            }
+
                             using (var stream = new MemoryStream(contentData))
                             {
                                 var contentType = MimeMapping.MimeUtility.GetMimeMapping(attachment.Name);

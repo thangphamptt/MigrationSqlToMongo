@@ -36,7 +36,6 @@ namespace MigrateSqlDbToMongoDbApplication.Services
             _candidateDbContext = candidateDbContext;
             _interviewDbContext = interviewDbContext;
 
-            organizationalUnitId = configuration.GetSection("CompanySetting:Id")?.Value;
             var azureStoregeConnectionString = configuration.GetSection("AzureStorage:StorageConnectionString")?.Value;
             uploadFileFromLink = new UploadFileFromLink(azureStoregeConnectionString);
             jobApplicationsData = _hrToolDbContext.JobApplications.ToList();
