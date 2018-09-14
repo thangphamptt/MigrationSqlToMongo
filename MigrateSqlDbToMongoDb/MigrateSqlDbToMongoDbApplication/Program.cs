@@ -77,15 +77,17 @@ namespace MigrateSqlDbToMongoDbApplication
 
             Task.Run(async () =>
             {
-                await migrateOrganizationalUnitService.ExecuteAsync();
-                await migrateCandidateService.ExecuteAsync();
-                await migrateApplicationService.ExecuteAsync();
-                await migrateInterviewService.ExecuteAsync();
-                await migrateScheduleService.ExecuteAsync();
-                await migrateJobService.ExecuteAsync();
-                await migrateOfferService.ExecuteAsync();
-                await migrateTemplateService.ExecuteAsync();
-                await migrateEmailService.ExecuteAsync();
+                //await migrateOrganizationalUnitService.ExecuteAsync();
+                //await migrateCandidateService.ExecuteAsync();
+                //await migrateApplicationService.ExecuteAsync();
+                //await migrateInterviewService.ExecuteAsync();
+                //await migrateScheduleService.ExecuteAsync();
+                //await migrateJobService.ExecuteAsync();
+                //await migrateOfferService.ExecuteAsync();
+                //await migrateTemplateService.ExecuteAsync();
+                //await migrateEmailService.ExecuteAsync();
+                await new MigrateAttachmentService(configuration, candidateDbContext).ExecuteAsync();
+
                 Console.WriteLine("\n MIGRATION COMPLETED !!");
             });
 

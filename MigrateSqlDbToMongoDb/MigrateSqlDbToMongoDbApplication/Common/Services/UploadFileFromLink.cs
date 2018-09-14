@@ -29,8 +29,8 @@ namespace MigrateSqlDbToMongoDbApplication.Common.Services
                     try
                     {
                         var attachmentUrl = new Uri(attachment.Path);
-                        HttpResponseMessage result = await client.GetAsync(attachmentUrl);
-                        if (result.IsSuccessStatusCode)
+                        HttpResponseMessage result = await client.GetAsync(attachmentUrl);                        
+                        if (result.IsSuccessStatusCode && result.StatusCode == System.Net.HttpStatusCode.OK)
                         {
                             var contentData = await result.Content.ReadAsByteArrayAsync();
 
@@ -55,6 +55,10 @@ namespace MigrateSqlDbToMongoDbApplication.Common.Services
 
                                 attachment.Path = await _uploadFileToAzureStorage.UploadFileAsync(fileAzureStorageModel);
                             }
+                        }
+                        else
+                        {
+                            return string.Empty;
                         }
                     }
                     catch (Exception ex)
