@@ -75,6 +75,8 @@ namespace MigrateSqlDbToMongoDbApplication
             var migrateEmailService = new MigrateEmailService(configuration, hrtoolDbContext, 
                 emailDbContext, candidateDbContext);
 
+            var migrateNestedApplicationIntoCandidateService = new MigrateNestedApplicationIntoCandidateService(candidateDbContext);
+
             Task.Run(async () =>
             {
                 //await migrateOrganizationalUnitService.ExecuteAsync();
@@ -86,7 +88,9 @@ namespace MigrateSqlDbToMongoDbApplication
                 //await migrateOfferService.ExecuteAsync();
                 //await migrateTemplateService.ExecuteAsync();
                 //await migrateEmailService.ExecuteAsync();
-                await new MigrateAttachmentService(configuration, candidateDbContext).ExecuteAsync();
+                //await new MigrateAttachmentService(configuration, candidateDbContext).ExecuteAsync();
+
+                await migrateNestedApplicationIntoCandidateService.ExecuteAsync();
 
                 Console.WriteLine("\n MIGRATION COMPLETED !!");
             });
