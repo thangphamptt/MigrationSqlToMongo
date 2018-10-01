@@ -23,7 +23,7 @@ namespace MigrateSqlDbToMongoDbApplication
         {
             Configuration();
 
-            var hrtoolDbContext = new HrToolv1DbContext(configuration);
+            //var hrtoolDbContext = new HrToolv1DbContext(configuration);
             var candidateDbContext = new CandidateDbContext(configuration);
             var interviewDbContext = new InterviewDbContext(configuration);
             var jobDbContext = new JobDbContext(configuration);
@@ -32,50 +32,52 @@ namespace MigrateSqlDbToMongoDbApplication
             var templateDbContext = new TemplateDbContext(configuration);
             var scheduleDbContext = new ScheduleDbContext(configuration);
 
-            var migrateOrganizationalUnitService = new MigrateOrganizationalUnitService(
-                configuration,
-                hrtoolDbContext,
-                candidateDbContext,
-                interviewDbContext,
-                jobDbContext,
-                jobMatchingDbContext,
-                offerDbContext,
-                templateDbContext);
+            //var migrateOrganizationalUnitService = new MigrateOrganizationalUnitService(
+            //    configuration,
+            //    hrtoolDbContext,
+            //    candidateDbContext,
+            //    interviewDbContext,
+            //    jobDbContext,
+            //    jobMatchingDbContext,
+            //    offerDbContext,
+            //    templateDbContext);
 
-            var migrateCandidateService = new MigrateCandidateService(configuration,
-                hrtoolDbContext,
-                candidateDbContext,
-                interviewDbContext,
-                jobMatchingDbContext,
-                offerDbContext,
-                scheduleDbContext);
+            //var migrateCandidateService = new MigrateCandidateService(configuration,
+            //    hrtoolDbContext,
+            //    candidateDbContext,
+            //    interviewDbContext,
+            //    jobMatchingDbContext,
+            //    offerDbContext,
+            //    scheduleDbContext);
 
-            var migrateApplicationService = new MigrateApplicationService(configuration,
-                hrtoolDbContext,
-                candidateDbContext,
-                interviewDbContext);
+            //var migrateApplicationService = new MigrateApplicationService(configuration,
+            //    hrtoolDbContext,
+            //    candidateDbContext,
+            //    interviewDbContext);
 
-            var migrateInterviewService = new MigrateInterviewService(configuration, hrtoolDbContext, interviewDbContext);
+            //var migrateInterviewService = new MigrateInterviewService(configuration, hrtoolDbContext, interviewDbContext);
 
-            var migrateScheduleService = new MigrateScheduleService(configuration, hrtoolDbContext,
-                scheduleDbContext, interviewDbContext);
+            //var migrateScheduleService = new MigrateScheduleService(configuration, hrtoolDbContext,
+            //    scheduleDbContext, interviewDbContext);
 
-            var migrateJobService = new MigrateJobService(configuration, hrtoolDbContext,
-                jobDbContext, candidateDbContext,
-                interviewDbContext, offerDbContext, 
-                jobMatchingDbContext);
+            //var migrateJobService = new MigrateJobService(configuration, hrtoolDbContext,
+            //    jobDbContext, candidateDbContext,
+            //    interviewDbContext, offerDbContext, 
+            //    jobMatchingDbContext);
 
-            var migrateOfferService = new MigrateOfferService(configuration, hrtoolDbContext, offerDbContext);
+            //var migrateOfferService = new MigrateOfferService(configuration, hrtoolDbContext, offerDbContext);
 
-            var migrateTemplateService = new MigrateTemplateService(configuration, hrtoolDbContext,
-                templateDbContext, candidateDbContext,
-                interviewDbContext);
+            //var migrateTemplateService = new MigrateTemplateService(configuration, hrtoolDbContext,
+            //    templateDbContext, candidateDbContext,
+            //    interviewDbContext);
 
-            var emailDbContext = new EmailDbContext(configuration);
-            var migrateEmailService = new MigrateEmailService(configuration, hrtoolDbContext, 
-                emailDbContext, candidateDbContext);
+            //var emailDbContext = new EmailDbContext(configuration);
+            //var migrateEmailService = new MigrateEmailService(configuration, hrtoolDbContext, 
+            //    emailDbContext, candidateDbContext);
 
             var migrateNestedApplicationIntoCandidateService = new MigrateNestedApplicationIntoCandidateService(candidateDbContext);
+            var removeCandidateWithoutApplicationService = new RemoveCandidateWithoutApplicationService(candidateDbContext, interviewDbContext, 
+                jobMatchingDbContext, offerDbContext, scheduleDbContext);
 
             Task.Run(async () =>
             {
@@ -90,7 +92,8 @@ namespace MigrateSqlDbToMongoDbApplication
                 //await migrateEmailService.ExecuteAsync();
                 //await new MigrateAttachmentService(configuration, candidateDbContext).ExecuteAsync();
 
-                await migrateNestedApplicationIntoCandidateService.ExecuteAsync();
+                //await migrateNestedApplicationIntoCandidateService.ExecuteAsync();
+                await removeCandidateWithoutApplicationService.ExecuteAsync();
 
                 Console.WriteLine("\n MIGRATION COMPLETED !!");
             });
